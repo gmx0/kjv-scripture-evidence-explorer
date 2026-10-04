@@ -182,3 +182,21 @@ The graph and workflows remain local, deterministic, inspectable, and non-genera
 Evidence
 `packages/search/src/workflows.ts`, `packages/search/src/cross-references.ts`, `config/cross-references/manifest.json`, `database/migrations/0002_phase3_cross_references.sql`, and Phase 3 unit/browser tests.
 
+### ADR-010 — Loopback development host compatibility
+
+Status: accepted
+
+Date: 2026-10-04
+
+Context
+The desktop preview opens the local development server at `127.0.0.1`, while Next.js starts it on `localhost`. Next.js blocks development-only resources across those hostnames by default, preventing React hydration and leaving interactive controls inert.
+
+Decision
+Allow the exact additional development hostname `127.0.0.1` through Next.js `allowedDevOrigins`. This affects development assets only and does not change production security headers, corpus behavior, ranking, or evidence semantics.
+
+Consequences
+The application hydrates when previewed through either loopback hostname. No non-loopback host or wildcard is permitted.
+
+Evidence
+`apps/web/next.config.ts` and live browser verification at `http://127.0.0.1:3000`.
+
