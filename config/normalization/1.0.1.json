@@ -1,0 +1,23 @@
+{
+  "version": "1.0.1",
+  "status": "accepted",
+  "supersedes": "1.0.0",
+  "exactModeUsesAliases": false,
+  "exactModeCaseSensitiveDefault": false,
+  "caseFolding": {
+    "enabledWhenCaseSensitiveIsFalse": true,
+    "rule": "Unicode NFC followed by locale-independent lowercase",
+    "preservesTypography": true
+  },
+  "typographicApostropheAliases": [
+    { "from": "’", "to": "'", "evidence": "typographic equivalence", "appliesTo": "normalized modes only" }
+  ],
+  "spellingAliases": [],
+  "lemmaMappings": [],
+  "governance": {
+    "authority": "project owner review",
+    "evidenceRequired": true,
+    "versionChangeRequired": true,
+    "silentChangesAllowed": false
+  }
+}

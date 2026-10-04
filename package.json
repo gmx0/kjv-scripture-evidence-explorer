@@ -1,0 +1,17 @@
+{
+  "name": "kjv-scripture-evidence-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.3.0",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test packages/corpus/test/reference.test.ts packages/corpus/test/tokenizer.test.ts packages/corpus/test/importer.test.ts packages/corpus/test/source-import.test.ts packages/search/test/scoring.test.ts packages/search/test/engine.test.ts packages/search/test/golden.test.ts",
+    "cli": "node --experimental-strip-types apps/cli/src/index.ts",
+    "import:corpus": "node --experimental-strip-types apps/cli/src/index.ts import",
+    "index:corpus": "node --experimental-strip-types apps/cli/src/index.ts index",
+    "golden:generate": "node --experimental-strip-types scripts/generate-phase1-golden.ts"
+  }
+}

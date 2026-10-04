@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "status": "accepted",
+  "exactModeUsesAliases": false,
+  "caseFolding": {
+    "enabledOutsideExactMode": true,
+    "rule": "Unicode NFC followed by locale-independent lowercase"
+  },
+  "typographicApostropheAliases": [
+    { "from": "’", "to": "'", "evidence": "typographic equivalence" }
+  ],
+  "spellingAliases": [],
+  "lemmaMappings": [],
+  "governance": {
+    "authority": "project owner review",
+    "evidenceRequired": true,
+    "versionChangeRequired": true,
+    "silentChangesAllowed": false
+  }
+}

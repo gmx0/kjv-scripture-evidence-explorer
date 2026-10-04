@@ -1,0 +1,27 @@
+{
+  "algorithmVersion": "1.0.0",
+  "status": "accepted",
+  "idfFormula": "ln((N + 1) / (df + 1)) + 1",
+  "phraseCap": 25,
+  "rareCap": 12,
+  "rareThresholdPercentile": 20,
+  "roundingDecimalPlaces": 6,
+  "tokenizerVersion": "1.0.0",
+  "normalizationVersion": "1.0.1",
+  "weights": {
+    "jaccard": 0.5,
+    "phrase": 0.2,
+    "rare": 0.15,
+    "order": 0.1,
+    "crossReference": 0.05
+  },
+  "tieBreakOrder": [
+    "score_desc",
+    "phrase_desc",
+    "rare_desc",
+    "jaccard_desc",
+    "cross_reference_desc",
+    "canonical_order_asc"
+  ],
+  "reviewEvidence": "tests/golden/phase1-related.json"
+}

@@ -1,0 +1,11 @@
+node_modules/
+.next/
+coverage/
+data/source/*
+data/derived/*
+!data/source/.gitkeep
+!data/source/README.md
+!data/derived/.gitkeep
+*.log
+.env*
+!.env.example
