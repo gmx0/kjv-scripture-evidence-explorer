@@ -72,11 +72,17 @@ Returns exact and selected normalized counts, first/last mentions, and book dist
 
 ### `POST /api/v1/topics/resolve`
 
-Returns exact KJV status first. If absent and external lookup is allowed, returns cited senses and candidate KJV vocabulary. A second request with `selectedSenseId` and selected candidates creates the bridge record.
+Returns exact KJV status first. If the topic is absent, the endpoint returns cached Princeton WordNet senses with provider, version, URL, retrieval date, license, and snapshot checksum. No expansion occurs until `selectedSenseId` is supplied. The selected sense is intersected with the KJV vocabulary, after which the user must submit `selectedCandidates` before any passages are returned.
+
+Resolved responses contain a separate exact-word result set for every candidate and a labeled combined view. Every result carries an `external_synonym_bridge` record with the original topic, selected sense, candidate term, and provider provenance. Dictionary confidence is not a Scripture score. Invalid sense/candidate selections return `422`; missing uncached dictionary data returns `503`.
 
 ### `POST /api/v1/graphs/evidence`
 
-Builds a bounded graph from an already defined query. Nodes are passages or terms; edges contain typed evidence and component scores.
+Builds a bounded graph from a canonical verse reference. Nodes are passages or normalized evidence terms. Every typed edge has an `explanationId`, and `tableRows` contains exactly one accessible row per edge. Bounds are explicit: `resultLimit` 1–50, `termLimit` 0–25, and `nodeLimit` 2–100.
+
+### `POST /api/v1/workflows`
+
+Runs one deterministic workflow selected by `type`: `gather_mentions`, `candidate_mates`, `divide_term`, `first_mention_chain`, or `lexical_witnesses`. Gather and chain operations use exact KJV occurrences in canonical order. Candidate mates reuse the accepted ranking. Divide-term groups only observed book contexts. Lexical witnesses are selected from distinct canonical books and are labeled as a heuristic rather than doctrinal independence.
 
 ### `POST /api/v1/exports/research-record`
 

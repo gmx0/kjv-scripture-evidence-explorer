@@ -28,26 +28,38 @@ Completion evidence: `docs/PHASE_1_REPORT.md`, `tests/golden/phase1-related.json
 
 ## Phase 2 — Web MVP
 
+Status: complete (2026-10-04)
+
 - Scaffold the Next.js application and database repository layer.
 - Implement passage, exact-search, related-search, comparison, and distribution endpoints.
 - Build the study page, context view, results table, filters, and explanation disclosures.
 - Add JSON research-record export.
 - Exit when browser tests reproduce CLI results.
 
+Completion evidence: `docs/PHASE_2_REPORT.md`, the `/api/v1` route handlers, `database/migrations/0001_phase2_core.sql`, the study workbench under `apps/web`, and `tests/browser/phase2.spec.ts`.
+
 ## Phase 3 — Graph and WHGW workflows
+
+Status: complete (2026-10-04)
 
 - Add the bounded evidence graph with accessible table parity.
 - Add gather mentions, candidate mates, divide terms, first-mention chain, and two/three-witness views.
 - Add versioned editorial cross-reference import, disabled until a licensed source is chosen.
 - Exit when every graph edge resolves to an explanation record.
 
+Completion evidence: `docs/PHASE_3_REPORT.md`, `packages/search/src/workflows.ts`, the Phase 3 `/api/v1` routes, `config/cross-references/manifest.json`, and `tests/browser/phase3.spec.ts`.
+
 ## Phase 4 — Modern topic resolver
+
+Status: complete (2026-10-04)
 
 - Integrate one approved dictionary provider.
 - Cache provenance and license data.
 - Build sense selection and KJV vocabulary intersection.
 - Add separate per-candidate rankings and a labeled combined view.
 - Exit when ambiguous terms cannot bypass user selection and the feature degrades cleanly offline.
+
+Completion evidence: `docs/PHASE_4_REPORT.md`, `packages/search/src/topics.ts`, `apps/web/src/server/wordnet-provider.ts`, the `/api/v1/topics/resolve` route, and `tests/browser/phase4.spec.ts`.
 
 ## Phase 5 — Optional generated explanation
 

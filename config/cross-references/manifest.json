@@ -1,0 +1,7 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": "1.0.0",
+  "setVersion": "unselected",
+  "enabled": false,
+  "approvalStatus": "awaiting_licensed_source"
+}

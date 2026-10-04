@@ -100,9 +100,23 @@ Evidence
 
 ### ADR-005 — External dictionary provider
 
-Status: proposed
+Status: accepted
 
-Default candidate: Princeton WordNet because it provides stable sense identifiers and a documented license. Confirm API/data access method, attribution, update policy, and synonym filtering.
+Date: 2026-10-04
+
+Context
+Modern-topic resolution needs stable sense identifiers, definitions, synonyms, an explicit license, and offline operation. A runtime web API would make core behavior depend on availability and could change results without a versioned import.
+
+Decision
+Use Princeton WordNet 3.0 from the official `WNdb-3.0.tar.gz` database archive. Pin archive SHA-256 `658b1ba191f5f98c2e9bae3e25c186013158f30ef779f191d2a44e5d25046dc8`. The importer extracts the eight required ASCII index/data files, preserves their embedded WordNet license notice, and records per-file checksums. Runtime lookup is local and writes immutable headword snapshots under the ignored derived-data cache.
+
+Sense IDs use `wn30:<part-of-speech>:<synset-offset>`. Only single-token synonyms that occur in the normalized KJV vocabulary become candidates. The user must select a sense and then select candidate KJV words. WordNet confidence never enters Scripture ranking; each candidate produces a separate exact-word result set, and the combined view exposes its winning bridge term.
+
+Consequences
+Topic resolution works without runtime network access after import and preserves provider, version, source URL, retrieval date, license, definition, synonyms, and payload checksum. A clean checkout must obtain the pinned official archive and run `npm run import:wordnet`. Missing data produces a visible `503`, while already cached headwords remain available. Updating WordNet requires a new provider version and reviewed provenance.
+
+Evidence
+`config/dictionary/wordnet-3.0.json`, `data/source/README.md`, `scripts/import-wordnet.ts`, `packages/search/src/topics.ts`, and Phase 4 unit/browser tests.
 
 ### ADR-006 — Editorial cross-reference dataset
 
@@ -127,4 +141,44 @@ Reference parsing, tokenization, scoring, and tests run immediately from a clean
 
 Evidence
 `package.json`, `packages/corpus`, `packages/search`, and the passing built-in Node test suite.
+
+### ADR-008 — Phase 2 repository adapters and web runtime
+
+Status: accepted
+
+Date: 2026-10-04
+
+Context
+The web MVP needs to run locally from the already audited canonical artifact while retaining the PostgreSQL production boundary chosen in ADR-003. Requiring a running database merely to verify browser parity would weaken the local-first requirement and duplicate the corpus authority.
+
+Decision
+Define one typed `CorpusRepository` contract with two server-only adapters. The local web runtime reads the versioned canonical JSONL plus its manifest and validates the row count before building the unchanged Phase 1 search engine. A `PostgresCorpusRepository` and numbered SQL migration define the relational production path. Neither adapter performs scoring; both feed canonical verse rows into the pure search package.
+
+Use Next.js 16 App Router route handlers in the Node.js runtime, Zod request validation, React 19, and Playwright browser acceptance tests. Generated corpus artifacts remain ignored and must be reproduced by the audited importer before local web startup.
+
+Consequences
+The entire Phase 2 experience remains usable without network access or a database after corpus import. PostgreSQL deployment can be added without moving ranking into SQL. Each Next.js server process pays a one-time in-memory index construction cost, after which queries reuse the cached service. A future database-backed index may reduce cold start without changing API results or algorithm version.
+
+Evidence
+`apps/web/src/server/corpus-repository.ts`, `database/migrations/0001_phase2_core.sql`, `apps/web/src/server/study-service.ts`, and `tests/browser/phase2.spec.ts`.
+
+### ADR-009 — Phase 3 evidence graph and workflow semantics
+
+Status: accepted
+
+Date: 2026-10-04
+
+Context
+Phase 3 introduces graph navigation and study workflows that can easily imply stronger interpretive claims than their underlying lexical evidence supports. Editorial cross-references also require a separately approved source and license.
+
+Decision
+Build bounded graphs directly from the accepted deterministic related-verse explanations. Verse and term nodes are visually distinct, every edge has a stored explanation, and the accessible table contains exactly one row per edge. “Gather mentions” and “first-mention chain” use exact occurrences in canonical order; “candidate mates” reuses algorithm 1.0.0; “divide term” groups observed contexts by canonical book without inventing senses; and two/three-witness views choose ranked candidates from distinct canonical books. Distinct books are a lexical-independence heuristic only.
+
+The cross-reference manifest format is versioned and fail-closed. Its checked-in manifest remains disabled. Enabling a set requires source URL, license, SHA-256 checksum, and explicit project-owner approval; Phase 3 imports no editorial dataset.
+
+Consequences
+The graph and workflows remain local, deterministic, inspectable, and non-generative. No scoring weight, normalization rule, stop-word rule, or tie-break order changed. A future editorial dataset can be added without silently entering the ranking system.
+
+Evidence
+`packages/search/src/workflows.ts`, `packages/search/src/cross-references.ts`, `config/cross-references/manifest.json`, `database/migrations/0002_phase3_cross_references.sql`, and Phase 3 unit/browser tests.
 

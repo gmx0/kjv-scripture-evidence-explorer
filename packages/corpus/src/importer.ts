@@ -20,7 +20,9 @@ const PCE_BOOK_CODES = [
 
 if (PCE_BOOK_CODES.length !== BOOKS.length) throw new Error("PCE book-code table must contain 66 entries");
 
-const BOOK_BY_CODE = new Map(PCE_BOOK_CODES.map((code, index) => [code, { ...BOOKS[index]!, bookOrder: index + 1 }]));
+const BOOK_BY_CODE = new Map<string, (typeof BOOKS)[number] & { bookOrder: number }>(
+  PCE_BOOK_CODES.map((code, index) => [code, { ...BOOKS[index]!, bookOrder: index + 1 }]),
+);
 const RECORD_PATTERN = /^([1-3]?[A-Za-z]+) (\d+):(\d+) (.+)$/u;
 
 export type ParatextType = "heading" | "subscription" | "terminal";

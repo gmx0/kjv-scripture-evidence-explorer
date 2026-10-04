@@ -106,7 +106,46 @@ npm run cli -- term gathered
 npm run cli -- related "Isaiah 34:16" --limit 20
 ```
 
-The accepted algorithm is version `1.0.0`; its ten reviewed golden queries are stored in `tests/golden/phase1-related.json`. See `docs/PHASE_1_REPORT.md` for details. The active work is now Phase 2: the Next.js application, repository layer, APIs, and browser parity tests.
+The accepted algorithm is version `1.0.0`; its ten reviewed golden queries are stored in `tests/golden/phase1-related.json`. See `docs/PHASE_1_REPORT.md` for details.
+
+## Phase 2 web application
+
+Phase 2 is complete. The Next.js workbench provides passage context, exact word and phrase search, related-verse ranking, passage comparison, term distribution, filters, complete “Why this matched” disclosures, and downloadable JSON research records. Its versioned API lives under `/api/v1`, and the browser parity suite reproduces the accepted CLI ordering.
+
+After importing the corpus, run the web application with:
+
+```text
+npm run dev:web
+```
+
+Verification commands:
+
+```text
+npm run typecheck
+npm test
+npm run build:web
+npm run test:browser
+```
+
+See `docs/PHASE_2_REPORT.md` for the implemented routes, repository boundary, and acceptance evidence.
+
+## Phase 3 evidence graph and workflows
+
+Phase 3 is complete. The workbench now includes a bounded evidence graph with accessible table parity and stored explanations for every edge. It also provides gather mentions, candidate mates, divide term by observed book context, first-mention chain, and two/three lexical-witness views. All workflows are deterministic and non-generative.
+
+Editorial cross-references remain disabled. The versioned intake contract requires a source URL, license, checksum, and explicit owner approval before any set can be enabled. See `docs/PHASE_3_REPORT.md`.
+
+## Phase 4 modern-topic resolver
+
+Phase 4 is complete. A query is checked against exact KJV wording first. Absent topics can then use locally imported Princeton WordNet 3.0 senses, but the user must select both the intended sense and the surviving KJV vocabulary before passages appear. Per-candidate searches and the combined view remain exact, deterministic, and visibly labeled as external synonym bridges.
+
+Download the pinned official archive described in `data/source/README.md`, then prepare the offline dictionary with:
+
+```text
+npm run import:wordnet
+```
+
+Dictionary snapshots are cached under ignored derived data with source, version, license, retrieval time, selected sense, candidate vocabulary, and checksum. See `docs/PHASE_4_REPORT.md`. The active roadmap work is now Phase 5, which remains optional.
 
 ## Source and licensing checkpoints
 

@@ -8,10 +8,29 @@
     "node": ">=22.6"
   },
   "scripts": {
-    "test": "node --experimental-strip-types --test packages/corpus/test/reference.test.ts packages/corpus/test/tokenizer.test.ts packages/corpus/test/importer.test.ts packages/corpus/test/source-import.test.ts packages/search/test/scoring.test.ts packages/search/test/engine.test.ts packages/search/test/golden.test.ts",
+    "test": "node --experimental-strip-types --test packages/corpus/test/reference.test.ts packages/corpus/test/tokenizer.test.ts packages/corpus/test/importer.test.ts packages/corpus/test/source-import.test.ts packages/search/test/scoring.test.ts packages/search/test/engine.test.ts packages/search/test/golden.test.ts packages/search/test/workflows.test.ts packages/search/test/cross-references.test.ts packages/search/test/topics.test.ts apps/web/test/wordnet-provider.test.ts apps/web/test/study-service.test.ts",
+    "test:browser": "playwright test",
+    "typecheck": "tsc --noEmit -p apps/web/tsconfig.json",
+    "dev:web": "next dev apps/web",
+    "build:web": "next build apps/web",
+    "start:web": "next start apps/web",
     "cli": "node --experimental-strip-types apps/cli/src/index.ts",
     "import:corpus": "node --experimental-strip-types apps/cli/src/index.ts import",
+    "import:wordnet": "node --experimental-strip-types scripts/import-wordnet.ts",
     "index:corpus": "node --experimental-strip-types apps/cli/src/index.ts index",
     "golden:generate": "node --experimental-strip-types scripts/generate-phase1-golden.ts"
+  },
+  "dependencies": {
+    "next": "^16.3.8",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "typescript": "^5.9.3"
   }
 }

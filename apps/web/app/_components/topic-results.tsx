@@ -1,0 +1,24 @@
+"use client";
+
+import { useState } from "react";
+
+type JsonObject = Record<string, any>;
+
+export function TopicResult({ data, busy, onContinue }: { data: JsonObject; busy: boolean; onContinue: (request: JsonObject) => Promise<void> }) {
+  const [senseId, setSenseId] = useState("");
+  const [candidates, setCandidates] = useState<string[]>([]);
+
+  if (data.status === "exact_kjv") return <section><p className="notice workflow-notice">{data.notice}</p><div className="section-title"><h3>{data.exact.total} exact KJV matches</h3><span>No external bridge used</span></div><div className="table-wrap"><table><thead><tr><th>Reference</th><th>Exact KJV text</th></tr></thead><tbody>{data.exact.matches.map((match: JsonObject) => <tr key={match.label}><th scope="row">{match.label}</th><td><p>{match.displayText}</p></td></tr>)}</tbody></table></div></section>;
+
+  if (data.status === "requires_sense_selection") return <section><ExternalNotice text={data.notice} /><fieldset className="sense-list"><legend>Select the intended WordNet sense</legend>{data.senses.map((sense: JsonObject) => <label key={sense.id}><input type="radio" name="topic-sense" value={sense.id} checked={senseId === sense.id} onChange={() => setSenseId(sense.id)} /><span><strong>{sense.partOfSpeech}</strong>{sense.definition}<small>{sense.synonyms.join(", ")}</small></span></label>)}</fieldset><button type="button" disabled={!senseId || busy} onClick={() => onContinue({ topic: data.topic, selectedSenseId: senseId })}>{busy ? "Checking vocabulary…" : "Use selected sense"}</button><Provenance data={data.provenance} /></section>;
+
+  if (data.status === "requires_candidate_selection") return <section><ExternalNotice text={data.notice} /><blockquote><strong>{data.selectedSense.partOfSpeech}</strong><p>{data.selectedSense.definition}</p></blockquote><fieldset className="candidate-list"><legend>Select candidate KJV words</legend>{data.candidates.map((candidate: JsonObject) => <label key={candidate.term}><input type="checkbox" checked={candidates.includes(candidate.term)} onChange={(event) => setCandidates((current) => event.target.checked ? [...current, candidate.term] : current.filter((term) => term !== candidate.term))} /><span><strong>{candidate.term}</strong><small>{candidate.verseFrequency} verses · {candidate.totalFrequency} occurrences</small></span></label>)}</fieldset><button type="button" disabled={!candidates.length || busy} onClick={() => onContinue({ topic: data.topic, selectedSenseId: data.selectedSense.id, selectedCandidates: candidates, limitPerCandidate: 100 })}>{busy ? "Searching Scripture…" : "Search selected KJV words"}</button><Provenance data={data.provenance} /></section>;
+
+  if (data.status === "no_kjv_candidates") return <section><ExternalNotice text={data.notice} /><blockquote><strong>{data.selectedSense.partOfSpeech}</strong><p>{data.selectedSense.definition}</p></blockquote><Provenance data={data.provenance} /></section>;
+
+  return <section><ExternalNotice text={data.notice} /><blockquote><strong>Selected external sense</strong><p>{data.selectedSense.definition}</p><small>{data.selectedCandidates.join(", ")}</small></blockquote><div className="section-title"><h3>{data.combined.length} combined Scripture results</h3><span>Exact selected-word evidence</span></div><TopicTable rows={data.combined} combined />{data.perCandidate.map((ranking: JsonObject) => <details className="topic-ranking" key={ranking.term}><summary>{ranking.term} · {ranking.total} results{ranking.truncated ? " · first 100 shown" : ""}</summary><TopicTable rows={ranking.results} /></details>)}<Provenance data={data.provenance} /></section>;
+}
+
+function TopicTable({ rows, combined = false }: { rows: JsonObject[]; combined?: boolean }) { return <div className="table-wrap"><table><thead><tr><th>Passage</th><th>Exact text</th><th>{combined ? "Winning bridge" : "Evidence"}</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><th scope="row"><span className="reference">{row.label}</span></th><td><p>{row.displayText}</p></td><td><span className="evidence-chip">external synonym bridge</span><br />{combined ? row.winningTerm : row.externalBridge.candidateTerm}{combined && row.matchedCandidateTerms.length > 1 ? ` (${row.matchedCandidateTerms.join(", ")})` : ""}</td></tr>)}</tbody></table></div>; }
+function ExternalNotice({ text }: { text: string }) { return <div className="external-notice"><strong>External vocabulary bridge</strong><p>{text}</p></div>; }
+function Provenance({ data }: { data: JsonObject }) { return <details className="provenance"><summary>Dictionary provenance</summary><dl className="evidence-list"><dt>Provider</dt><dd>{data.provider} {data.providerVersion}</dd><dt>Source</dt><dd><a href={data.sourceUrl}>{data.sourceUrl}</a></dd><dt>Retrieved</dt><dd>{data.retrievedAt}</dd><dt>License</dt><dd>{data.license}</dd><dt>Snapshot SHA-256</dt><dd><code>{data.payloadSha256}</code></dd></dl></details>; }

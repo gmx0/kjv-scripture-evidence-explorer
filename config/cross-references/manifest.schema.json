@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/kjv-evidence/cross-reference-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "setVersion", "enabled", "approvalStatus"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "1.0.0" },
+    "setVersion": { "type": "string", "minLength": 1 },
+    "enabled": { "type": "boolean" },
+    "approvalStatus": { "enum": ["awaiting_licensed_source", "approved"] },
+    "sourceUrl": { "type": "string", "format": "uri" },
+    "license": { "type": "string", "minLength": 1 },
+    "checksum": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "ownerApproved": { "type": "boolean" }
+  }
+}
