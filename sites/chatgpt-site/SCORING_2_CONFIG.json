@@ -1,16 +1,13 @@
 {
-  "algorithmVersion": "2.2.0",
+  "algorithmVersion": "2.3.0",
   "corpusBounds": "dist/data/kjv/corpus-bounds.json",
-  "weights": {
-    "jaccard": 0.35,
-    "phrase": 0.25,
-    "rare": 0.25,
-    "order": 0.08,
-    "capitalization": 0.03,
-    "morphology": 0.02,
-    "letterPattern": 0.01,
-    "crossReference": 0.01
+  "selfRecursiveTextualCounts": {"word": 1243, "letter": 71, "line": 33},
+  "textualGroupWeights": {
+    "word": {"exactCoverage": 0.60, "rarity": 0.30, "morphology": 0.10},
+    "letter": {"letterPattern": 0.75, "capitalization": 0.25},
+    "line": {"phrase": 0.70, "order": 0.30}
   },
+  "selfRecursiveProximityCounts": {"word": 1243, "book": 196, "letter": 71, "verse_line": 33, "chapter_chapiter": 29, "testament": 14},
   "phraseGapDecay": 0.7,
   "compoundGapDecay": 0.5,
   "wordLengthNormalization": "ln(1 + letters) / ln(1 + corpus_max_letters)",
@@ -26,5 +23,5 @@
   "roundingDecimalPlaces": 6,
   "candidateQuota": 5000,
   "nonIdentityScoreCap": 0.984999,
-  "notes": "Textual facts remain exact; normalizers use measured corpus bounds. Pruned means not evaluated, not zero similarity."
+  "notes": "Algorithm 2.3 derives textual-group and canonical-proximity importance from exact singular-plus-plural KJV occurrence counts. Textual and proximity scores remain separate."
 }

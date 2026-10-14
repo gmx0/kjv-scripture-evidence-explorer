@@ -1,4 +1,7 @@
-export const ALGORITHM_VERSION = "2.2.0";
+export const ALGORITHM_VERSION = "2.3.0";
+
+export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,line:33});
+export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
 
 export const clamp = value => Math.min(1, Math.max(0, value));
 export const round6 = value => Math.round((value + Number.EPSILON) * 1e6) / 1e6;
@@ -151,6 +154,22 @@ export function nearPhraseEvidence(a,b){
   return selected;
 }
 
+function weightedByCounts(values, counts) {
+  const entries=Object.entries(counts), denominator=entries.reduce((sum,[,count])=>sum+count,0);
+  return round6(clamp(entries.reduce((sum,[key,count])=>sum+count*clamp(values[key]||0),0)/denominator));
+}
+
+export function textualSelfRecursiveScore(components) {
+  const word=clamp(.60*components.jaccard+.30*components.rare+.10*components.morphology);
+  const letter=clamp(.75*components.letterPattern+.25*components.capitalization);
+  const line=clamp(.70*components.phrase+.30*components.order);
+  return {score:weightedByCounts({word,letter,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),line:round6(line)}};
+}
+
+export function proximitySelfRecursiveScore(axes) {
+  return weightedByCounts(axes,PROXIMITY_CONCEPT_COUNTS);
+}
+
 export function totalScore(components) {
-  return round6(.35*components.jaccard+.25*components.phrase+.25*components.rare+.08*components.order+.03*components.capitalization+.02*components.morphology+.01*components.letterPattern+.01*components.crossReference);
+  return textualSelfRecursiveScore(components).score;
 }
