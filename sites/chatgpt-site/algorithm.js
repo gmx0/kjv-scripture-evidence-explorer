@@ -1,10 +1,30 @@
-export const ALGORITHM_VERSION = "2.0.0";
+export const ALGORITHM_VERSION = "2.1.0";
 
 export const clamp = value => Math.min(1, Math.max(0, value));
 export const round6 = value => Math.round((value + Number.EPSILON) * 1e6) / 1e6;
 
 export function idf(totalDocuments, documentFrequency) {
   return Math.log((totalDocuments + 1) / (documentFrequency + 1)) + 1;
+}
+
+export function corpusRarity(totalTokens, corpusFrequency) {
+  if (totalTokens <= 0) return 0;
+  return clamp(Math.log((totalTokens + 1) / (Math.max(0, corpusFrequency) + 1)) / Math.log(totalTokens + 1));
+}
+
+export function wordLengthValue(input) {
+  const length = [...String(input)].filter(char => /\p{L}/u.test(char)).length;
+  return round6(1 - Math.exp(-length / 4));
+}
+
+export function exactWordEvidence(input, rarity) {
+  return round6(wordLengthValue(input) * (.30 + .70 * clamp(rarity)));
+}
+
+export function rarityConcentration(shared, rarityFor, cap = 2) {
+  const evidence = shared.map(token => ({token, rarity:rarityFor(token), lengthValue:wordLengthValue(token)}));
+  const score = clamp(evidence.reduce((sum,item)=>sum+item.rarity**2*item.lengthValue,0)/cap);
+  return {score:round6(score),evidence};
 }
 
 export function lemmaCandidates(input) {
@@ -127,5 +147,5 @@ export function nearPhraseEvidence(a,b){
 }
 
 export function totalScore(components) {
-  return round6(.30*components.jaccard+.20*components.phrase+.10*components.rare+.10*components.order+.10*components.capitalization+.10*components.morphology+.05*components.letterPattern+.05*components.crossReference);
+  return round6(.35*components.jaccard+.22*components.phrase+.25*components.rare+.08*components.order+.04*components.capitalization+.03*components.morphology+.02*components.letterPattern+.01*components.crossReference);
 }
