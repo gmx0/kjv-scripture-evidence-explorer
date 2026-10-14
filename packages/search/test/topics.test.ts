@@ -16,7 +16,7 @@ const verses: ImportedVerse[] = texts.map(([label, displayText], index) => ({
   reference: parseReference(label).start, sourceBookCode: `fixture-${index}`, displayText, rawRecord: displayText,
   sourceLine: index + 1, sourceByteStart: 0, sourceByteEnd: displayText.length, italics: [], paratext: [],
 }));
-const engine = buildSearchEngine(verses, { corpusVersion: "fixture-v1", algorithmVersion: "1.0.0" });
+const engine = buildSearchEngine(verses, { corpusVersion: "fixture-v1", algorithmVersion: "1.1.0" });
 
 const snapshot: DictionarySnapshot = {
   provider: "Princeton WordNet",

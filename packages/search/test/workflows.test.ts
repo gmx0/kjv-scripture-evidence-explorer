@@ -32,7 +32,7 @@ const fixture: ImportedVerse[] = [
   paratext: [],
 }));
 
-const engine = buildSearchEngine(fixture, { corpusVersion: "fixture-v1", algorithmVersion: "1.0.0" });
+const engine = buildSearchEngine(fixture, { corpusVersion: "fixture-v1", algorithmVersion: "1.1.0" });
 
 test("bounded evidence graph has typed nodes and an accessible row for every explained edge", () => {
   const graph = buildEvidenceGraph(engine, { reference: "Genesis 1:1", resultLimit: 3, termLimit: 4, nodeLimit: 8 });

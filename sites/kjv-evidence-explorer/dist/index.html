@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Deterministic, inspectable KJV Scripture search and study.">
+  <title>KJV Scripture Evidence Explorer</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Pure Cambridge Edition · deterministic evidence</p>
+        <h1>KJV Scripture Evidence Explorer</h1>
+        <p class="lede">Trace exact wording, inspect lexical relationships, and keep every result reproducible. <a href="https://www.amazon.com/dp/B0CW5Y1HV2" target="_blank" rel="noreferrer">View the companion ebook on Amazon</a>.</p>
+      </div>
+      <div class="version-badge" aria-label="Active versions"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>1.1.0</strong></div>
+    </header>
+
+    <div id="loading" class="loading" role="status"><strong>Preparing the research index…</strong><span>Loading the exact versioned KJV corpus in this browser.</span></div>
+
+    <section id="workbench" class="workbench" aria-label="Scripture study workspace" hidden>
+      <form id="query-form" class="query-panel">
+        <div id="mode-tabs" class="mode-tabs" role="radiogroup" aria-label="Search mode"></div>
+        <label class="query-label" for="study-query">Study query</label>
+        <div class="query-row"><input id="study-query" required value="John 3:16"><button id="study-button" type="submit">Study</button></div>
+        <div id="controls"></div>
+        <p id="notice" class="notice">Normalized matches are derived evidence; the displayed KJV wording is never replaced.</p>
+      </form>
+
+      <div class="results-panel">
+        <div class="results-heading"><div><p class="eyebrow">Evidence record</p><h2 id="result-title">Ready for a query</h2></div><button id="export-button" type="button" class="secondary" disabled>Export JSON</button></div>
+        <div id="live-status" class="sr-only" aria-live="polite"></div>
+        <div id="results"><div class="empty-state"><span aria-hidden="true">§</span><h3>Start with a passage or exact phrase.</h3><p>The workbench will show exact text and an inspectable evidence trail.</p></div></div>
+      </div>
+    </section>
+    <footer><p>The exact KJV text is authoritative for quotations. Similarity is lexical evidence, not proof of interpretation.</p></footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

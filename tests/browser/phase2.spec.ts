@@ -1,6 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
+test("homepage links to the companion ebook", async ({ page }) => {
+  await page.goto("/");
+
+  const ebookLink = page.getByRole("link", { name: "View the companion ebook on Amazon" });
+  await expect(ebookLink).toHaveAttribute("href", "https://www.amazon.com/dp/B0CW5Y1HV2");
+  await expect(ebookLink).toHaveAttribute("target", "_blank");
+});
+
 test("browser related results reproduce the accepted CLI golden ranking", async ({ page }) => {
   const golden = JSON.parse(await readFile("tests/golden/phase1-related.json", "utf8"));
   const fixture = golden.queries.find((query: { reference: string }) => query.reference === "Genesis 1:1");
@@ -34,6 +42,6 @@ test("API validation, passage context, and export are available", async ({ reque
   const record = await exported.json();
   expect(record.recordVersion).toBe("1.0.0");
   expect(record.response.data.results.map((result: { label: string }) => result.label)).toEqual(
-    ["John 1:1", "Jeremiah 51:48", "2 Samuel 18:9", "Genesis 1:17", "John 1:2"],
+    ["2 Samuel 18:9", "Jeremiah 51:48", "John 1:1", "Jeremiah 32:17", "Genesis 1:17"],
   );
 });

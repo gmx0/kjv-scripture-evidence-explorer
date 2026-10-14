@@ -18,11 +18,11 @@ const references = [
 
 const corpus = importPceArchive(resolve("data/source/TEXT-PCE.zip"));
 if (corpus.report.errors.length) throw new Error(JSON.stringify(corpus.report.errors, null, 2));
-const engine = buildSearchEngine(corpus.verses, { corpusVersion: corpus.report.corpusVersion, algorithmVersion: "1.0.0" });
+const engine = buildSearchEngine(corpus.verses, { corpusVersion: corpus.report.corpusVersion, algorithmVersion: "1.1.0" });
 const fixture = {
   corpusVersion: corpus.report.corpusVersion,
   canonicalSha256: corpus.report.canonicalSha256,
-  algorithmVersion: "1.0.0",
+  algorithmVersion: "1.1.0",
   configurationSha256: engine.configurationSha256,
   reviewStatus: "accepted",
   queries: references.map((reference) => {

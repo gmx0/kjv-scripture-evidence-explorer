@@ -12,16 +12,20 @@ Make the evidence legible before making it impressive. Tables are primary; the g
 4. Evidence summary: counts, significant terms, longest shared phrases, first/last mention.
 5. Results table with reference, exact text excerpt, total score, component bars, and “Why” disclosure.
 6. Filters for book, testament, minimum score, evidence type, and excluded terms.
-7. Table/graph toggle.
-8. Export control.
+7. Related-search strictness control: Letter exact, Exact spelling (default), or Normalized.
+8. Table/graph toggle.
+9. Export control.
 
 ## Explanation disclosure
 
 For each result, show:
 
 - shared surface words;
+- the selected strictness and strongest tier for every matched token;
 - normalized matches with their rules;
 - exact phrase spans;
+- phrase tier and multiplier;
+- edition-specific capitalization matches, positions, and multipliers;
 - rare-word frequencies;
 - word-order alignment;
 - editorial cross-reference source, if present;

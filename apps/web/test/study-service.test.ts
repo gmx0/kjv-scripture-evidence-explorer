@@ -29,7 +29,7 @@ const repository: CorpusRepository = {
   identity: {
     corpusVersion: "fixture-v1",
     canonicalSha256: "fixture-sha256",
-    algorithmVersion: "1.0.0",
+    algorithmVersion: "1.1.0",
   },
   async allVerses() { return verses; },
 };
@@ -54,7 +54,7 @@ test("exact and distribution results share the engine's canonical evidence", asy
 
 test("related API adds display text without changing engine ordering or explanations", async () => {
   const service = await createStudyService(repository);
-  const related = service.related({ reference: "John 3:16", limit: 10, filters: {}, algorithmVersion: "1.0.0" });
+  const related = service.related({ reference: "John 3:16", limit: 10, filters: {}, algorithmVersion: "1.1.0" });
 
   assert.equal(related.data.results[0]?.label, "1 John 4:9");
   assert.equal(related.data.results[0]?.displayText, TEXTS[4][1]);
@@ -86,7 +86,7 @@ test("invalid exact terms and unknown canonical references expose client-safe st
 
   assert.throws(() => service.exact("two words", "word"), (error: any) => error.status === 400);
   assert.throws(
-    () => service.related({ reference: "John 99:99", algorithmVersion: "1.0.0" }),
+    () => service.related({ reference: "John 99:99", algorithmVersion: "1.1.0" }),
     (error: any) => error.status === 404,
   );
 });
@@ -97,7 +97,7 @@ test("evidence graph API preserves table parity and explanation resolution", asy
 
   assert.equal(graph.data.edges.length, graph.data.tableRows.length);
   assert.ok(graph.data.edges.every((edge: any) => graph.data.explanations[edge.explanationId]));
-  assert.equal(graph.meta.algorithmVersion, "1.0.0");
+  assert.equal(graph.meta.algorithmVersion, "1.1.0");
 });
 
 test("WHGW workflow API exposes exact gathering and lexical witnesses", async () => {

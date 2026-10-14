@@ -3,7 +3,7 @@ import { TOKENIZER_VERSION, compareReferences, formatReference, normalizeToken, 
 import type { ImportedVerse } from "../../corpus/src/importer.ts";
 import type { CanonicalReference, Token } from "../../shared/src/index.ts";
 import { DEFAULT_SCORING_CONFIG, scoreVersePair, sortExplanations } from "./scoring.ts";
-import type { ScoreExplanation, ScoringConfig, ScoringVerse } from "./types.ts";
+import type { MatchLevel, ScoreExplanation, ScoringConfig, ScoringVerse } from "./types.ts";
 
 export interface IndexedVerse extends ScoringVerse {
   id: number;
@@ -53,7 +53,7 @@ export interface SearchEngine {
     meta: SearchMetadata; query: string; caseSensitive: boolean; verseFrequency: number; totalFrequency: number;
     firstMention: CanonicalReference | null; lastMention: CanonicalReference | null; byBook: Record<string, number>;
   };
-  related(reference: string, options?: { limit?: number; books?: string[]; testament?: "OT" | "NT" }): {
+  related(reference: string, options?: { limit?: number; books?: string[]; testament?: "OT" | "NT"; matchLevel?: MatchLevel }): {
     meta: SearchMetadata; source: { reference: CanonicalReference; displayText: string }; candidateCount: number; results: ScoreExplanation[];
   };
 }
@@ -79,7 +79,9 @@ export function buildSearchEngine(
   const referenceIndex = new Map<string, number>();
   const scoringVerses: ScoringVerse[] = verses.map((verse) => ({
     reference: verse.reference,
-    tokens: verse.tokens.map((token) => ({ ...token, folded: normalizeToken(token).normalized })),
+    displayText: verse.displayText,
+    tokens: verse.tokens,
+    normalizedTokens: verse.tokens.map((token) => normalizeToken(token).normalized),
   }));
 
   for (const verse of verses) {
@@ -108,30 +110,36 @@ export function buildSearchEngine(
     idf,
     rareThreshold,
   };
-  const scoringConfig: ScoringConfig = {
+  const scoringConfig = (matchLevel: MatchLevel): ScoringConfig => ({
     ...DEFAULT_SCORING_CONFIG,
     algorithmVersion: identity.algorithmVersion,
     corpusSize: verses.length,
     documentFrequency,
     rareThreshold,
+    matchLevel,
+    phraseLevelMultipliers: { ...DEFAULT_SCORING_CONFIG.phraseLevelMultipliers },
     weights: { ...DEFAULT_SCORING_CONFIG.weights },
-  };
-  const configurationSha256 = hashStable({
-    algorithmVersion: scoringConfig.algorithmVersion,
-    phraseCap: scoringConfig.phraseCap,
-    rareCap: scoringConfig.rareCap,
+  });
+  const configurationSha256For = (matchLevel: MatchLevel) => hashStable({
+    algorithmVersion: identity.algorithmVersion,
+    phraseCap: DEFAULT_SCORING_CONFIG.phraseCap,
+    rareCap: DEFAULT_SCORING_CONFIG.rareCap,
     rareThresholdPercentile: 20,
     rareThreshold,
-    weights: scoringConfig.weights,
+    matchLevel,
+    phraseLevelMultipliers: DEFAULT_SCORING_CONFIG.phraseLevelMultipliers,
+    capitalizationPositionMultipliers: { identical: 1, identicalSentenceStart: 0.5, differentOnlySentenceStart: 0.25, different: 0 },
+    weights: DEFAULT_SCORING_CONFIG.weights,
     roundingDecimalPlaces: 6,
     tokenizerVersion: TOKENIZER_VERSION,
     normalizationVersion: "1.0.1",
     tieBreakOrder: ["score_desc", "phrase_desc", "rare_desc", "jaccard_desc", "cross_reference_desc", "canonical_order_asc"],
   });
-  const metadata = (queryTrace: string[]): SearchMetadata => ({
+  const configurationSha256 = configurationSha256For(DEFAULT_SCORING_CONFIG.matchLevel);
+  const metadata = (queryTrace: string[], matchLevel: MatchLevel = DEFAULT_SCORING_CONFIG.matchLevel): SearchMetadata => ({
     corpusVersion: identity.corpusVersion,
     algorithmVersion: identity.algorithmVersion,
-    configurationSha256,
+    configurationSha256: configurationSha256For(matchLevel),
     queryTrace,
   });
   const collectExactWord = (query: string, caseSensitive: boolean): { key: string; matches: ExactMatch[] } => {
@@ -218,8 +226,15 @@ export function buildSearchEngine(
       const source = verses[sourceId]!;
       const candidateIds = new Set<number>();
       const scoringSource = scoringVerses[sourceId]!;
-      for (const token of new Set(scoringSource.tokens.map((item) => item.folded))) {
-        for (const verseId of normalizedIndex.get(token)?.keys() ?? []) if (verseId !== sourceId) candidateIds.add(verseId);
+      const matchLevel = options.matchLevel ?? DEFAULT_SCORING_CONFIG.matchLevel;
+      const candidateIndex = matchLevel === "letter_exact" ? surfaceIndex : matchLevel === "normalized" ? normalizedIndex : caseFoldedIndex;
+      const sourceKeys = matchLevel === "letter_exact"
+        ? scoringSource.tokens.map((item) => item.surface)
+        : matchLevel === "normalized"
+          ? scoringSource.normalizedTokens!
+          : scoringSource.tokens.map((item) => item.folded);
+      for (const token of new Set(sourceKeys)) {
+        for (const verseId of candidateIndex.get(token)?.keys() ?? []) if (verseId !== sourceId) candidateIds.add(verseId);
       }
       const filtered = [...candidateIds].filter((verseId) => {
         const candidate = verses[verseId]!;
@@ -228,12 +243,12 @@ export function buildSearchEngine(
         if (options.testament === "NT" && candidate.reference.bookOrder <= 39) return false;
         return true;
       });
-      const explanations = filtered.map((verseId) => scoreVersePair(scoringSource, scoringVerses[verseId]!, scoringConfig, {
+      const explanations = filtered.map((verseId) => scoreVersePair(scoringSource, scoringVerses[verseId]!, scoringConfig(matchLevel), {
         corpusVersion: identity.corpusVersion,
       }));
       const sorted = sortExplanations(explanations);
       return {
-        meta: metadata([`reference:${canonical}`, `candidates:${filtered.length}`, `filters:${stableStringify({ books: options.books ?? [], testament: options.testament ?? null })}`]),
+        meta: metadata([`reference:${canonical}`, `matchLevel:${matchLevel}`, `candidates:${filtered.length}`, `filters:${stableStringify({ books: options.books ?? [], testament: options.testament ?? null })}`], matchLevel),
         source: { reference: source.reference, displayText: source.displayText },
         candidateCount: filtered.length,
         results: sorted.slice(0, clampLimit(options.limit ?? 50, 50)),

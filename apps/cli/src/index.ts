@@ -65,10 +65,10 @@ if (command === "reference") {
   const parsed = parseArguments(args);
   const corpus = importPceArchive(resolve("data/source/TEXT-PCE.zip"));
   if (corpus.report.errors.length) fail(`Corpus import failed:\n${JSON.stringify(corpus.report.errors, null, 2)}`);
-  const engine = buildSearchEngine(corpus.verses, { corpusVersion: CORPUS_VERSION, algorithmVersion: "1.0.0" });
+  const engine = buildSearchEngine(corpus.verses, { corpusVersion: CORPUS_VERSION, algorithmVersion: "1.1.0" });
   if (command === "stats" || command === "index") {
     const statisticsRecord = {
-      meta: { corpusVersion: CORPUS_VERSION, algorithmVersion: "1.0.0", configurationSha256: engine.configurationSha256 },
+      meta: { corpusVersion: CORPUS_VERSION, algorithmVersion: "1.1.0", configurationSha256: engine.configurationSha256 },
       statistics: engine.statistics,
     };
     if (command === "index") {

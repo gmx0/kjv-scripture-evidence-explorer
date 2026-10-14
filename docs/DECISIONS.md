@@ -82,7 +82,7 @@ Evidence
 
 ### ADR-004 — Scoring version 1.0.0
 
-Status: accepted
+Status: superseded by ADR-012
 
 Date: 2026-10-04
 
@@ -199,4 +199,40 @@ The application hydrates when previewed through either loopback hostname. No non
 
 Evidence
 `apps/web/next.config.ts` and live browser verification at `http://127.0.0.1:3000`.
+
+### ADR-011 — Browser-local ChatGPT Site distribution
+
+Status: accepted
+
+Date: 2026-10-04
+
+Context
+ChatGPT Sites serves static assets or Cloudflare Worker applications. The existing Next.js server adapter reads canonical artifacts from a local filesystem and cannot be deployed unchanged. Moving ranking into a hosted database would introduce a second implementation and weaken parity with the accepted pure search package.
+
+Decision
+Publish the first private ChatGPT Site as a static, browser-local research application. Serve the pinned canonical KJV JSONL, statistics, corpus manifest, WordNet files, and license as immutable Site assets. Build indexes and perform retrieval, scoring, graph construction, and workflows in the visitor's browser. Retain corpus `KJV-PCE-BP-2010-v1`, algorithm `1.0.0`, configuration SHA-256 `4f130074a8f9433ecf4422aec811c96c0d4ec6ba5cac17492d74d7ca216aaaca`, exact display text, tie-break order, and external-evidence labels.
+
+Consequences
+The Site has a larger initial corpus download but requires no hosted database, model, secret, or network service after its immutable assets are loaded. WordNet assets load only when a modern term absent from the KJV requires an explicit dictionary-sense choice. The original Next.js application and API remain authoritative development surfaces; golden browser tests protect ranking parity in the static distribution.
+
+Evidence
+`sites/kjv-evidence-explorer/`, its five-flow browser suite, and the Phase 1 golden ranking.
+
+### ADR-012 — Letter-exact evidence and capitalization-aware scoring
+
+Status: accepted
+
+Date: 2026-10-14
+
+Context
+Algorithm `1.0.0` preserved exact KJV display text but ranked shared vocabulary case-insensitively and did not distinguish capitalization or phrase-match strength. The project owner requested a more letter-exact algorithm with capitalization retained as an explicit evidence layer.
+
+Decision
+Adopt algorithm `1.1.0`. Exact spelling remains the default matching level; users may select stricter `letter_exact` matching or explicitly derived `normalized` matching. Add capitalization fidelity `K` at weight `0.10`, reduce weighted Jaccard from `0.50` to `0.40`, and keep all other weights unchanged. Down-weight capitalization at verse or sentence starts. Score each non-overlapping phrase only at its strongest tier: case-exact `1.0`, case-folded `0.8`, or normalized `0.5`. Preserve the existing tie-break order.
+
+Consequences
+Rankings change and therefore require a new configuration checksum and golden fixture. Every explanation identifies the selected match level, token tier, phrase tier, capitalization positions, multipliers, corpus version, and algorithm version. Capitalization is described only as edition-specific evidence and cannot be used as an original-language or doctrinal claim. The prior `1.0.0` configuration remains in version control.
+
+Evidence
+`config/scoring/1.1.0.json`, `packages/search/test/scoring.test.ts`, `packages/search/test/engine.test.ts`, and the regenerated `tests/golden/phase1-related.json`. The ten-query review records the expected reordering caused by capitalization fidelity and tiered phrase credit; corpus and normalization versions are unchanged.
 

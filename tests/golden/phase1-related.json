@@ -1,31 +1,16 @@
 {
   "corpusVersion": "KJV-PCE-BP-2010-v1",
   "canonicalSha256": "08c7215fb243f935c102c53fa1f8c849f0472aaff77fa3fae0bbe12b6b875e48",
-  "algorithmVersion": "1.0.0",
-  "configurationSha256": "4f130074a8f9433ecf4422aec811c96c0d4ec6ba5cac17492d74d7ca216aaaca",
+  "algorithmVersion": "1.1.0",
+  "configurationSha256": "15eef95ae377a030daca0c63a6fa7f909fdbb74b581c828bb0799cdc4e711f8d",
   "reviewStatus": "accepted",
   "queries": [
     {
       "reference": "Genesis 1:1",
       "results": [
         {
-          "reference": "John 1:1",
-          "score": 0.36016,
-          "matchedNormalizedTokens": [
-            "in",
-            "the",
-            "beginning",
-            "god",
-            "and"
-          ],
-          "matchedPhrases": [
-            "in the beginning",
-            "and the"
-          ]
-        },
-        {
-          "reference": "Jeremiah 51:48",
-          "score": 0.338767,
+          "reference": "2 Samuel 18:9",
+          "score": 0.427967,
           "matchedNormalizedTokens": [
             "the",
             "heaven",
@@ -37,10 +22,39 @@
           ]
         },
         {
-          "reference": "2 Samuel 18:9",
-          "score": 0.334958,
+          "reference": "Jeremiah 51:48",
+          "score": 0.427053,
           "matchedNormalizedTokens": [
             "the",
+            "heaven",
+            "and",
+            "earth"
+          ],
+          "matchedPhrases": [
+            "the heaven and the earth"
+          ]
+        },
+        {
+          "reference": "John 1:1",
+          "score": 0.418601,
+          "matchedNormalizedTokens": [
+            "in",
+            "the",
+            "beginning",
+            "god",
+            "and"
+          ],
+          "matchedPhrases": [
+            "In the beginning",
+            "and the"
+          ]
+        },
+        {
+          "reference": "Jeremiah 32:17",
+          "score": 0.399125,
+          "matchedNormalizedTokens": [
+            "the",
+            "god",
             "heaven",
             "and",
             "earth"
@@ -51,7 +65,7 @@
         },
         {
           "reference": "Genesis 1:17",
-          "score": 0.318921,
+          "score": 0.375602,
           "matchedNormalizedTokens": [
             "in",
             "the",
@@ -61,22 +75,9 @@
             "earth"
           ],
           "matchedPhrases": [
-            "in the",
+            "In the",
             "the heaven",
             "the earth"
-          ]
-        },
-        {
-          "reference": "John 1:2",
-          "score": 0.317182,
-          "matchedNormalizedTokens": [
-            "in",
-            "the",
-            "beginning",
-            "god"
-          ],
-          "matchedPhrases": [
-            "in the beginning"
           ]
         }
       ]
@@ -86,7 +87,7 @@
       "results": [
         {
           "reference": "Mark 12:29",
-          "score": 0.556144,
+          "score": 0.582332,
           "matchedNormalizedTokens": [
             "hear",
             "o",
@@ -99,12 +100,12 @@
             "one"
           ],
           "matchedPhrases": [
-            "hear o israel the lord our god is one lord"
+            "Hear O Israel The LORD our God is one LORD"
           ]
         },
         {
           "reference": "Psalms 99:9",
-          "score": 0.387458,
+          "score": 0.41794,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -113,12 +114,12 @@
             "is"
           ],
           "matchedPhrases": [
-            "the lord our god is"
+            "The LORD our God is"
           ]
         },
         {
           "reference": "Deuteronomy 4:7",
-          "score": 0.357909,
+          "score": 0.396063,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -127,12 +128,25 @@
             "is"
           ],
           "matchedPhrases": [
-            "the lord our god is"
+            "The LORD our God is"
+          ]
+        },
+        {
+          "reference": "Deuteronomy 5:2",
+          "score": 0.395622,
+          "matchedNormalizedTokens": [
+            "the",
+            "lord",
+            "our",
+            "god"
+          ],
+          "matchedPhrases": [
+            "The LORD our God"
           ]
         },
         {
           "reference": "Daniel 9:14",
-          "score": 0.345372,
+          "score": 0.385076,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -141,21 +155,7 @@
             "is"
           ],
           "matchedPhrases": [
-            "the lord our god is"
-          ]
-        },
-        {
-          "reference": "2 Kings 18:22",
-          "score": 0.337572,
-          "matchedNormalizedTokens": [
-            "the",
-            "lord",
-            "our",
-            "god",
-            "is"
-          ],
-          "matchedPhrases": [
-            "the lord our god is"
+            "The LORD our God is"
           ]
         }
       ]
@@ -165,7 +165,7 @@
       "results": [
         {
           "reference": "Psalms 27:1",
-          "score": 0.312872,
+          "score": 0.389478,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -175,12 +175,12 @@
             "shall"
           ],
           "matchedPhrases": [
-            "the lord is my"
+            "The LORD is my"
           ]
         },
         {
           "reference": "Lamentations 3:24",
-          "score": 0.30888,
+          "score": 0.385725,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -189,12 +189,12 @@
             "i"
           ],
           "matchedPhrases": [
-            "the lord is my"
+            "The LORD is my"
           ]
         },
         {
           "reference": "Psalms 118:14",
-          "score": 0.305616,
+          "score": 0.383058,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -202,12 +202,12 @@
             "my"
           ],
           "matchedPhrases": [
-            "the lord is my"
+            "The LORD is my"
           ]
         },
         {
           "reference": "2 Samuel 22:2",
-          "score": 0.299858,
+          "score": 0.378194,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -215,15 +215,13 @@
             "my"
           ],
           "matchedPhrases": [
-            "the lord is my"
+            "The LORD is my"
           ]
         },
         {
-          "reference": "Psalms 16:8",
-          "score": 0.29939,
+          "reference": "Psalms 62:6",
+          "score": 0.368974,
           "matchedNormalizedTokens": [
-            "the",
-            "lord",
             "is",
             "my",
             "i",
@@ -231,8 +229,8 @@
             "not"
           ],
           "matchedPhrases": [
-            "the lord",
-            "i shall not"
+            "is my",
+            "I shall not"
           ]
         }
       ]
@@ -242,7 +240,7 @@
       "results": [
         {
           "reference": "Deuteronomy 6:5",
-          "score": 0.416776,
+          "score": 0.492805,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -253,13 +251,13 @@
             "and"
           ],
           "matchedPhrases": [
-            "the lord",
+            "the LORD",
             "with all thine heart and"
           ]
         },
         {
           "reference": "Deuteronomy 30:6",
-          "score": 0.380104,
+          "score": 0.461967,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -270,13 +268,13 @@
             "and"
           ],
           "matchedPhrases": [
-            "the lord",
+            "the LORD",
             "with all thine heart and"
           ]
         },
         {
           "reference": "Deuteronomy 30:10",
-          "score": 0.369666,
+          "score": 0.452721,
           "matchedNormalizedTokens": [
             "in",
             "the",
@@ -289,13 +287,13 @@
             "unto"
           ],
           "matchedPhrases": [
-            "the lord",
+            "the LORD",
             "with all thine heart and"
           ]
         },
         {
           "reference": "Deuteronomy 26:16",
-          "score": 0.366771,
+          "score": 0.451188,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -306,13 +304,13 @@
             "and"
           ],
           "matchedPhrases": [
-            "the lord",
+            "the LORD",
             "with all thine heart and"
           ]
         },
         {
           "reference": "Deuteronomy 30:2",
-          "score": 0.366405,
+          "score": 0.448665,
           "matchedNormalizedTokens": [
             "the",
             "lord",
@@ -324,7 +322,7 @@
             "unto"
           ],
           "matchedPhrases": [
-            "the lord",
+            "the LORD",
             "with all thine heart and"
           ]
         }
@@ -335,7 +333,7 @@
       "results": [
         {
           "reference": "Psalms 69:28",
-          "score": 0.351101,
+          "score": 0.440881,
           "matchedNormalizedTokens": [
             "out",
             "of",
@@ -350,7 +348,7 @@
         },
         {
           "reference": "Revelation 22:19",
-          "score": 0.343948,
+          "score": 0.434758,
           "matchedNormalizedTokens": [
             "out",
             "of",
@@ -366,7 +364,7 @@
         },
         {
           "reference": "Jeremiah 36:11",
-          "score": 0.343367,
+          "score": 0.434694,
           "matchedNormalizedTokens": [
             "out",
             "of",
@@ -376,12 +374,12 @@
           ],
           "matchedPhrases": [
             "out of the book",
-            "of the lord"
+            "of the LORD"
           ]
         },
         {
           "reference": "Isaiah 52:11",
-          "score": 0.342868,
+          "score": 0.432044,
           "matchedNormalizedTokens": [
             "ye",
             "out",
@@ -393,12 +391,12 @@
           ],
           "matchedPhrases": [
             "ye out of the",
-            "of the lord"
+            "of the LORD"
           ]
         },
         {
           "reference": "2 Chronicles 28:21",
-          "score": 0.33955,
+          "score": 0.43164,
           "matchedNormalizedTokens": [
             "out",
             "of",
@@ -410,7 +408,7 @@
           ],
           "matchedPhrases": [
             "out of the",
-            "of the lord and"
+            "of the LORD and"
           ]
         }
       ]
@@ -420,7 +418,7 @@
       "results": [
         {
           "reference": "Luke 4:4",
-          "score": 0.55504,
+          "score": 0.578447,
           "matchedNormalizedTokens": [
             "but",
             "answered",
@@ -442,14 +440,14 @@
             "god"
           ],
           "matchedPhrases": [
-            "it is written",
-            "man shall not live by bread alone but by every word",
-            "of god"
+            "It is written",
+            "Man shall not live by bread alone but by every word",
+            "of God"
           ]
         },
         {
           "reference": "Matthew 15:26",
-          "score": 0.404757,
+          "score": 0.475601,
           "matchedNormalizedTokens": [
             "but",
             "he",
@@ -463,12 +461,12 @@
             "the"
           ],
           "matchedPhrases": [
-            "but he answered and said it is"
+            "But he answered and said It is"
           ]
         },
         {
           "reference": "Matthew 15:24",
-          "score": 0.380347,
+          "score": 0.458112,
           "matchedNormalizedTokens": [
             "but",
             "he",
@@ -480,13 +478,13 @@
             "the"
           ],
           "matchedPhrases": [
-            "but he answered and said",
+            "But he answered and said",
             "of the"
           ]
         },
         {
           "reference": "Ruth 2:6",
-          "score": 0.369127,
+          "score": 0.455301,
           "matchedNormalizedTokens": [
             "answered",
             "and",
@@ -499,34 +497,23 @@
             "the"
           ],
           "matchedPhrases": [
-            "answered and said it is",
+            "answered and said It is",
             "out of the"
           ]
         },
         {
-          "reference": "Deuteronomy 8:3",
-          "score": 0.366114,
+          "reference": "Matthew 25:12",
+          "score": 0.441302,
           "matchedNormalizedTokens": [
             "but",
             "he",
+            "answered",
             "and",
-            "man",
-            "not",
-            "live",
-            "by",
-            "bread",
-            "every",
-            "word",
-            "that",
-            "proceedeth",
-            "out",
-            "of",
-            "the",
-            "mouth"
+            "said",
+            "not"
           ],
           "matchedPhrases": [
-            "not live by bread",
-            "but by every word that proceedeth out of the mouth of"
+            "But he answered and said"
           ]
         }
       ]
@@ -536,7 +523,7 @@
       "results": [
         {
           "reference": "John 3:15",
-          "score": 0.501115,
+          "score": 0.556093,
           "matchedNormalizedTokens": [
             "that",
             "whosoever",
@@ -556,7 +543,7 @@
         },
         {
           "reference": "1 John 4:9",
-          "score": 0.353305,
+          "score": 0.431323,
           "matchedNormalizedTokens": [
             "god",
             "the",
@@ -571,12 +558,12 @@
           ],
           "matchedPhrases": [
             "the world that",
-            "his only begotten son"
+            "his only begotten Son"
           ]
         },
         {
           "reference": "John 12:46",
-          "score": 0.312475,
+          "score": 0.390484,
           "matchedNormalizedTokens": [
             "the",
             "world",
@@ -595,7 +582,7 @@
         },
         {
           "reference": "Acts 10:43",
-          "score": 0.300912,
+          "score": 0.385591,
           "matchedNormalizedTokens": [
             "the",
             "that",
@@ -610,19 +597,20 @@
           ]
         },
         {
-          "reference": "Hebrews 11:17",
-          "score": 0.274873,
+          "reference": "John 6:40",
+          "score": 0.340829,
           "matchedNormalizedTokens": [
             "the",
             "that",
-            "he",
-            "his",
-            "only",
-            "begotten",
-            "son"
+            "son",
+            "believeth",
+            "him",
+            "have",
+            "everlasting",
+            "life"
           ],
           "matchedPhrases": [
-            "his only begotten son"
+            "have everlasting life"
           ]
         }
       ]
@@ -632,7 +620,7 @@
       "results": [
         {
           "reference": "Romans 8:4",
-          "score": 0.44817,
+          "score": 0.518536,
           "matchedNormalizedTokens": [
             "in",
             "who",
@@ -645,12 +633,12 @@
             "spirit"
           ],
           "matchedPhrases": [
-            "who walk not after the flesh but after the spirit"
+            "who walk not after the flesh but after the Spirit"
           ]
         },
         {
           "reference": "Romans 8:5",
-          "score": 0.349815,
+          "score": 0.428652,
           "matchedNormalizedTokens": [
             "are",
             "after",
@@ -661,31 +649,12 @@
           ],
           "matchedPhrases": [
             "after the flesh",
-            "after the spirit"
-          ]
-        },
-        {
-          "reference": "1 Peter 4:6",
-          "score": 0.316457,
-          "matchedNormalizedTokens": [
-            "to",
-            "them",
-            "are",
-            "in",
-            "the",
-            "flesh",
-            "but",
-            "spirit"
-          ],
-          "matchedPhrases": [
-            "to them",
-            "the flesh but",
-            "the spirit"
+            "after the Spirit"
           ]
         },
         {
           "reference": "Hebrews 7:16",
-          "score": 0.311996,
+          "score": 0.398397,
           "matchedNormalizedTokens": [
             "is",
             "who",
@@ -700,8 +669,22 @@
           ]
         },
         {
+          "reference": "Galatians 4:23",
+          "score": 0.386676,
+          "matchedNormalizedTokens": [
+            "who",
+            "after",
+            "the",
+            "flesh",
+            "but"
+          ],
+          "matchedPhrases": [
+            "after the flesh but"
+          ]
+        },
+        {
           "reference": "Philippians 3:3",
-          "score": 0.310714,
+          "score": 0.37709,
           "matchedNormalizedTokens": [
             "no",
             "which",
@@ -714,9 +697,9 @@
             "spirit"
           ],
           "matchedPhrases": [
-            "in christ jesus",
+            "in Christ Jesus",
             "the flesh",
-            "the spirit"
+            "the Spirit"
           ]
         }
       ]
@@ -726,7 +709,7 @@
       "results": [
         {
           "reference": "1 Timothy 4:5",
-          "score": 0.212927,
+          "score": 0.299893,
           "matchedNormalizedTokens": [
             "is",
             "by",
@@ -736,26 +719,25 @@
             "for"
           ],
           "matchedPhrases": [
-            "of god and"
+            "of God and"
           ]
         },
         {
-          "reference": "1 Timothy 6:1",
-          "score": 0.208958,
+          "reference": "Romans 15:32",
+          "score": 0.2977,
           "matchedNormalizedTokens": [
-            "all",
+            "by",
             "of",
             "god",
-            "and",
-            "doctrine"
+            "and"
           ],
           "matchedPhrases": [
-            "of god and"
+            "of God and"
           ]
         },
         {
           "reference": "1 Corinthians 12:8",
-          "score": 0.207944,
+          "score": 0.296028,
           "matchedNormalizedTokens": [
             "is",
             "given",
@@ -768,29 +750,31 @@
           ]
         },
         {
-          "reference": "Romans 15:32",
-          "score": 0.204756,
+          "reference": "1 John 4:7",
+          "score": 0.294308,
           "matchedNormalizedTokens": [
-            "by",
+            "is",
             "of",
             "god",
-            "and"
+            "and",
+            "for"
           ],
           "matchedPhrases": [
-            "of god and"
+            "of God and"
           ]
         },
         {
-          "reference": "Luke 22:70",
-          "score": 0.203812,
+          "reference": "1 John 4:3",
+          "score": 0.294025,
           "matchedNormalizedTokens": [
-            "all",
+            "is",
             "of",
             "god",
-            "and"
+            "and",
+            "in"
           ],
           "matchedPhrases": [
-            "of god and"
+            "of God and"
           ]
         }
       ]
@@ -800,7 +784,7 @@
       "results": [
         {
           "reference": "Revelation 22:19",
-          "score": 0.445772,
+          "score": 0.507667,
           "matchedNormalizedTokens": [
             "man",
             "the",
@@ -821,14 +805,14 @@
           "matchedPhrases": [
             "the words of the",
             "of this",
-            "if any man shall",
-            "god shall",
+            "If any man shall",
+            "God shall",
             "are written in this book"
           ]
         },
         {
           "reference": "Revelation 22:7",
-          "score": 0.382631,
+          "score": 0.466105,
           "matchedNormalizedTokens": [
             "i",
             "that",
@@ -844,7 +828,7 @@
         },
         {
           "reference": "2 Chronicles 33:18",
-          "score": 0.362939,
+          "score": 0.443614,
           "matchedNormalizedTokens": [
             "unto",
             "that",
@@ -864,28 +848,8 @@
           ]
         },
         {
-          "reference": "Deuteronomy 30:10",
-          "score": 0.359954,
-          "matchedNormalizedTokens": [
-            "unto",
-            "the",
-            "of",
-            "this",
-            "book",
-            "if",
-            "god",
-            "are",
-            "written",
-            "in"
-          ],
-          "matchedPhrases": [
-            "of the",
-            "are written in this book"
-          ]
-        },
-        {
           "reference": "2 Chronicles 34:21",
-          "score": 0.353617,
+          "score": 0.431889,
           "matchedNormalizedTokens": [
             "for",
             "that",
@@ -902,6 +866,26 @@
             "the words of the",
             "that are",
             "written in this book"
+          ]
+        },
+        {
+          "reference": "Deuteronomy 30:10",
+          "score": 0.419657,
+          "matchedNormalizedTokens": [
+            "unto",
+            "the",
+            "of",
+            "this",
+            "book",
+            "if",
+            "god",
+            "are",
+            "written",
+            "in"
+          ],
+          "matchedPhrases": [
+            "of the",
+            "are written in this book"
           ]
         }
       ]

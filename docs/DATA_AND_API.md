@@ -56,11 +56,12 @@ Request:
   "reference": "John 3:16",
   "limit": 50,
   "filters": {},
-  "algorithmVersion": "1.0.0"
+  "matchLevel": "exact_spelling",
+  "algorithmVersion": "1.1.0"
 }
 ```
 
-Returns ranked result explanations matching `SCORING_SPEC.md`.
+Returns ranked result explanations matching `SCORING_SPEC.md`. `matchLevel` is one of `letter_exact`, `exact_spelling` (the default), or `normalized`; the response records the selected level, phrase tier, capitalization evidence, and its configuration hash.
 
 ### `POST /api/v1/compare`
 

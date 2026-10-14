@@ -63,7 +63,7 @@ The repository now contains the first executable engine skeleton:
 - a versioned Unicode-aware tokenizer with exact offsets;
 - corpus-manifest validation and SHA-256 helpers;
 - a versioned JSON Schema for corpus manifests;
-- draft version 1.0.0 scoring primitives with explanations and tie-breaking;
+- versioned scoring primitives with explanations, capitalization fidelity, phrase tiers, and stable tie-breaking;
 - a dependency-free CLI for reference and token inspection;
 - unit tests covering normal, boundary, and failure cases.
 
@@ -106,7 +106,7 @@ npm run cli -- term gathered
 npm run cli -- related "Isaiah 34:16" --limit 20
 ```
 
-The accepted algorithm is version `1.0.0`; its ten reviewed golden queries are stored in `tests/golden/phase1-related.json`. See `docs/PHASE_1_REPORT.md` for details.
+The active algorithm is version `1.1.0`; its ten reviewed golden queries are stored in `tests/golden/phase1-related.json`. It defaults to exact spelling, offers a letter-exact mode, and reports capitalization and phrase tiers separately. See `docs/SCORING_SPEC.md` and `docs/DECISIONS.md` for the current behavior; `docs/PHASE_1_REPORT.md` records the original `1.0.0` release.
 
 ## Phase 2 web application
 
@@ -150,4 +150,8 @@ Dictionary snapshots are cached under ignored derived data with source, version,
 ## Source and licensing checkpoints
 
 Use a KJV source that is lawful for the intended jurisdiction and record its exact edition, source URL, retrieval date, checksum, and any territorial restrictions. Do not assume “public domain” has identical meaning in every country. Candidate sources and supporting references are listed in `docs/CORPUS_AND_NORMALIZATION.md`.
+
+## ChatGPT Site distribution
+
+`sites/kjv-evidence-explorer/` contains a portable static distribution for private ChatGPT Sites hosting. It serves the pinned KJV and WordNet artifacts as immutable assets and performs indexing, retrieval, scoring, graph construction, and workflow execution in the visitor's browser. The distribution retains corpus `KJV-PCE-BP-2010-v1`, algorithm `1.1.0`, and default configuration SHA-256 `15eef95ae377a030daca0c63a6fa7f909fdbb74b581c828bb0799cdc4e711f8d`.
 

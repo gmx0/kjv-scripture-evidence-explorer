@@ -11,6 +11,7 @@ export const relatedRequestSchema = z.object({
     testament: z.enum(["OT", "NT"]).optional(),
   }).strict().optional(),
   algorithmVersion: z.string().optional(),
+  matchLevel: z.enum(["letter_exact", "exact_spelling", "normalized"]).optional(),
 }).strict();
 
 export const compareRequestSchema = z.object({
@@ -42,7 +43,7 @@ export const topicRequestSchema = z.object({
 export const researchQuerySchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("reference"), input: reference, context: z.number().int().min(0).max(20).optional() }).strict(),
   z.object({ mode: z.enum(["exact-word", "exact-phrase"]), input: z.string().trim().min(1).max(200), limit, caseSensitive: z.boolean().optional() }).strict(),
-  z.object({ mode: z.literal("related"), input: reference, limit, filters: relatedRequestSchema.shape.filters }).strict(),
+  z.object({ mode: z.literal("related"), input: reference, limit, filters: relatedRequestSchema.shape.filters, matchLevel: relatedRequestSchema.shape.matchLevel }).strict(),
   z.object({ mode: z.literal("compare"), references: z.array(reference).min(2).max(10) }).strict(),
   z.object({ mode: z.literal("graph"), ...graphRequestSchema.shape }).strict(),
   z.object({ mode: z.literal("workflow"), request: workflowRequestSchema }).strict(),

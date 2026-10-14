@@ -1,0 +1,41 @@
+{
+  "algorithmVersion": "1.1.0",
+  "status": "accepted",
+  "idfFormula": "ln((N + 1) / (df + 1)) + 1",
+  "phraseCap": 25,
+  "rareCap": 12,
+  "rareThresholdPercentile": 20,
+  "roundingDecimalPlaces": 6,
+  "tokenizerVersion": "1.0.0",
+  "normalizationVersion": "1.0.1",
+  "defaultMatchLevel": "exact_spelling",
+  "matchLevels": ["letter_exact", "exact_spelling", "normalized"],
+  "phraseLevelMultipliers": {
+    "caseExact": 1.0,
+    "caseFolded": 0.8,
+    "normalized": 0.5
+  },
+  "capitalizationPositionMultipliers": {
+    "identical": 1.0,
+    "identicalSentenceStart": 0.5,
+    "differentOnlySentenceStart": 0.25,
+    "different": 0.0
+  },
+  "weights": {
+    "jaccard": 0.4,
+    "phrase": 0.2,
+    "rare": 0.15,
+    "order": 0.1,
+    "capitalization": 0.1,
+    "crossReference": 0.05
+  },
+  "tieBreakOrder": [
+    "score_desc",
+    "phrase_desc",
+    "rare_desc",
+    "jaccard_desc",
+    "cross_reference_desc",
+    "canonical_order_asc"
+  ],
+  "reviewEvidence": "tests/golden/phase1-related.json"
+}

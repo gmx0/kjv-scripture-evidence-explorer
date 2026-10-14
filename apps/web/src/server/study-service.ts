@@ -17,7 +17,7 @@ import {
   lexicalWitnesses,
 } from "../../../../packages/search/src/workflows.ts";
 import type { IndexedVerse, SearchEngine } from "../../../../packages/search/src/engine.ts";
-import type { ScoringConfig, ScoringVerse } from "../../../../packages/search/src/types.ts";
+import type { MatchLevel, ScoringConfig, ScoringVerse } from "../../../../packages/search/src/types.ts";
 import { resolveTopic, TopicResolutionError } from "../../../../packages/search/src/topics.ts";
 import type { DictionaryProvider, TopicRequest } from "../../../../packages/search/src/topics.ts";
 import type { CanonicalReference } from "../../../../packages/shared/src/index.ts";
@@ -38,6 +38,7 @@ export interface RelatedRequest {
   limit?: number | undefined;
   filters?: { books?: string[] | undefined; testament?: "OT" | "NT" | undefined } | undefined;
   algorithmVersion?: string | undefined;
+  matchLevel?: MatchLevel | undefined;
 }
 
 export interface GraphRequest {
@@ -57,7 +58,7 @@ export type WorkflowRequest =
 export type ResearchQuery =
   | { mode: "reference"; input: string; context?: number | undefined }
   | { mode: "exact-word" | "exact-phrase"; input: string; limit?: number | undefined; caseSensitive?: boolean | undefined }
-  | { mode: "related"; input: string; limit?: number | undefined; filters?: RelatedRequest["filters"] }
+  | { mode: "related"; input: string; limit?: number | undefined; filters?: RelatedRequest["filters"]; matchLevel?: MatchLevel | undefined }
   | { mode: "compare"; references: string[] }
   | ({ mode: "graph" } & GraphRequest)
   | { mode: "workflow"; request: WorkflowRequest }
@@ -106,6 +107,7 @@ export async function createStudyService(repository: CorpusRepository, dictionar
     corpusSize: engine.statistics.corpusSize,
     documentFrequency: engine.statistics.documentFrequency,
     rareThreshold: engine.statistics.rareThreshold,
+    phraseLevelMultipliers: { ...DEFAULT_SCORING_CONFIG.phraseLevelMultipliers },
     weights: { ...DEFAULT_SCORING_CONFIG.weights },
   };
 
@@ -172,7 +174,8 @@ export async function createStudyService(repository: CorpusRepository, dictionar
       const reference = requiredText(request.reference, "reference", 100);
       const canonical = formatReference(requireVerse(engine, reference).reference);
       const filters = validateFilters(request.filters);
-      const result = engine.related(canonical, { limit: validateLimit(request.limit, 50), ...filters });
+      const matchLevel = request.matchLevel ?? DEFAULT_SCORING_CONFIG.matchLevel;
+      const result = engine.related(canonical, { limit: validateLimit(request.limit, 50), matchLevel, ...filters });
       return response({
         ...result,
         source: { ...result.source, label: formatReference(result.source.reference) },
@@ -288,7 +291,7 @@ export async function createStudyService(repository: CorpusRepository, dictionar
         case "reference": exportedResponse = service.passage(query.input, query.context); break;
         case "exact-word": exportedResponse = service.exact(query.input, "word", exactOptions(query)); break;
         case "exact-phrase": exportedResponse = service.exact(query.input, "phrase", exactOptions(query)); break;
-        case "related": exportedResponse = service.related({ reference: query.input, limit: query.limit, filters: query.filters, algorithmVersion: repository.identity.algorithmVersion }); break;
+        case "related": exportedResponse = service.related({ reference: query.input, limit: query.limit, filters: query.filters, matchLevel: query.matchLevel, algorithmVersion: repository.identity.algorithmVersion }); break;
         case "compare": exportedResponse = service.compare(query.references); break;
         case "graph": exportedResponse = service.evidenceGraph(query); break;
         case "workflow": exportedResponse = service.workflow(query.request); break;
@@ -316,7 +319,7 @@ function requireVerse(engine: SearchEngine, input: string): IndexedVerse {
 }
 
 function scoringVerse(verse: IndexedVerse): ScoringVerse {
-  return { reference: verse.reference, tokens: verse.tokens.map((token) => ({ ...token, folded: normalizeToken(token).normalized })) };
+  return { reference: verse.reference, displayText: verse.displayText, tokens: verse.tokens, normalizedTokens: verse.tokens.map((token) => normalizeToken(token).normalized) };
 }
 
 function toPassageVerse(verse: IndexedVerse) {

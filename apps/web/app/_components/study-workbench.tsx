@@ -7,6 +7,7 @@ import { TopicResult } from "./topic-results";
 
 type Mode = "reference" | "exact-word" | "exact-phrase" | "related" | "compare" | "graph" | "workflow" | "topic";
 type WorkflowType = "gather_mentions" | "candidate_mates" | "divide_term" | "first_mention_chain" | "lexical_witnesses";
+type MatchLevel = "letter_exact" | "exact_spelling" | "normalized";
 type JsonObject = Record<string, any>;
 
 const MODE_LABELS: Record<Mode, string> = {
@@ -38,6 +39,7 @@ export function StudyWorkbench({ books }: { books: string[] }) {
   const [book, setBook] = useState("");
   const [minimumScore, setMinimumScore] = useState(0);
   const [evidenceType, setEvidenceType] = useState("");
+  const [matchLevel, setMatchLevel] = useState<MatchLevel>("exact_spelling");
   const [workflowType, setWorkflowType] = useState<WorkflowType>("gather_mentions");
   const [witnessCount, setWitnessCount] = useState<2 | 3>(2);
   const [result, setResult] = useState<JsonObject | null>(null);
@@ -84,6 +86,7 @@ export function StudyWorkbench({ books }: { books: string[] }) {
       mode,
       input: cleaned,
       limit: 50,
+      matchLevel,
       filters: {
         ...(testament ? { testament } : {}),
         ...(book ? { books: [book] } : {}),
@@ -98,7 +101,7 @@ export function StudyWorkbench({ books }: { books: string[] }) {
       const params = new URLSearchParams({ q: query.input, mode: query.mode === "exact-word" ? "word" : "phrase", limit: String(query.limit), caseSensitive: String(query.caseSensitive) });
       return readResponse(await fetch(`/api/v1/search/exact?${params}`));
     }
-    if (query.mode === "related") return postJson("/api/v1/search/related", { reference: query.input, limit: query.limit, filters: query.filters, algorithmVersion: "1.0.0" });
+    if (query.mode === "related") return postJson("/api/v1/search/related", { reference: query.input, limit: query.limit, filters: query.filters, matchLevel: query.matchLevel, algorithmVersion: "1.1.0" });
     if (query.mode === "graph") return postJson("/api/v1/graphs/evidence", { reference: query.reference, resultLimit: query.resultLimit, termLimit: query.termLimit, nodeLimit: query.nodeLimit });
     if (query.mode === "workflow") return postJson("/api/v1/workflows", query.request);
     if (query.mode === "topic") return postJson("/api/v1/topics/resolve", query.request);
@@ -165,14 +168,15 @@ export function StudyWorkbench({ books }: { books: string[] }) {
         {mode === "related" && (
           <fieldset className="filters">
             <legend>Candidate filters</legend>
+            <label>Strictness<select value={matchLevel} onChange={(event) => setMatchLevel(event.target.value as MatchLevel)}><option value="exact_spelling">Exact spelling</option><option value="letter_exact">Letter exact</option><option value="normalized">Normalized</option></select></label>
             <label>Testament<select value={testament} onChange={(event) => setTestament(event.target.value)}><option value="">All</option><option value="OT">Old Testament</option><option value="NT">New Testament</option></select></label>
             <label>Book<select value={book} onChange={(event) => setBook(event.target.value)}><option value="">All books</option>{books.map((name) => <option key={name}>{name}</option>)}</select></label>
             <label>Minimum score<input type="number" min="0" max="1" step="0.01" value={minimumScore} onChange={(event) => setMinimumScore(Number(event.target.value))} /></label>
-            <label>Evidence<select value={evidenceType} onChange={(event) => setEvidenceType(event.target.value)}><option value="">All evidence</option><option value="shared_nonzero_token">Shared word</option><option value="shared_exact_phrase">Exact phrase</option></select></label>
+            <label>Evidence<select value={evidenceType} onChange={(event) => setEvidenceType(event.target.value)}><option value="">All evidence</option><option value="shared_nonzero_token">Shared word</option><option value="shared_exact_phrase">Case-exact phrase</option><option value="shared_case_folded_phrase">Case-folded phrase</option><option value="shared_normalized_phrase">Normalized phrase</option></select></label>
           </fieldset>
         )}
         {mode === "workflow" && <fieldset className="filters workflow-controls"><legend>Workflow</legend><label>Method<select value={workflowType} onChange={(event) => setWorkflowType(event.target.value as WorkflowType)}><option value="gather_mentions">Gather mentions</option><option value="candidate_mates">Candidate mates</option><option value="divide_term">Divide term by book</option><option value="first_mention_chain">First-mention chain</option><option value="lexical_witnesses">Two/three witnesses</option></select></label>{workflowType === "lexical_witnesses" && <label>Witness count<select value={witnessCount} onChange={(event) => setWitnessCount(Number(event.target.value) as 2 | 3)}><option value={2}>Two</option><option value={3}>Three</option></select></label>}</fieldset>}
-        <p className="notice">{mode === "topic" ? "Dictionary senses are external bridges. They never replace KJV wording or alter Scripture ranking." : "Normalized matches are derived evidence; the displayed KJV wording is never replaced."}</p>
+        <p className="notice">{mode === "topic" ? "Dictionary senses are external bridges. They never replace KJV wording or alter Scripture ranking." : mode === "related" ? "Capitalization is edition-specific evidence in this corpus, not proof of interpretation or original-language meaning." : "Normalized matches are derived evidence; the displayed KJV wording is never replaced."}</p>
       </form>
 
       <div className="results-panel">
@@ -213,7 +217,7 @@ function ExactResult({ data, distribution }: { data: JsonObject; distribution?: 
 }
 
 function RelatedResult({ data, rows }: { data: JsonObject; rows: JsonObject[] }) {
-  return <section><blockquote><strong>{data.source.label}</strong><p>{data.source.displayText}</p></blockquote><div className="section-title"><h3>{rows.length} ranked results</h3><span>{data.candidateCount} candidates evaluated</span></div><div className="table-wrap"><table><thead><tr><th>Rank</th><th>Passage</th><th>Score</th><th>Components</th><th>Evidence</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.rank}</td><th scope="row"><span className="reference">{row.label}</span><p>{row.displayText}</p></th><td><strong>{row.score.toFixed(6)}</strong></td><td><ComponentBars components={row.components} /></td><td><details><summary>Why this matched</summary><dl className="evidence-list"><dt>Shared words</dt><dd>{row.matchedNormalizedTokens.join(", ") || "None"}</dd><dt>Exact phrases</dt><dd>{row.matchedPhrases.map((phrase: JsonObject) => phrase.tokens.join(" ")).join("; ") || "None"}</dd><dt>Rare words</dt><dd>{row.rareTokens.map((token: JsonObject) => `${token.token} (df ${token.documentFrequency})`).join(", ") || "None"}</dd><dt>Candidate reason</dt><dd>{row.candidateReasons.join(", ")}</dd><dt>Tie-break</dt><dd>{row.tieBreak}</dd></dl></details></td></tr>)}</tbody></table></div></section>;
+  return <section><blockquote><strong>{data.source.label}</strong><p>{data.source.displayText}</p></blockquote><div className="section-title"><h3>{rows.length} ranked results</h3><span>{data.candidateCount} candidates evaluated</span></div><div className="table-wrap"><table><thead><tr><th>Rank</th><th>Passage</th><th>Score</th><th>Components</th><th>Evidence</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.rank}</td><th scope="row"><span className="reference">{row.label}</span><p>{row.displayText}</p></th><td><strong>{row.score.toFixed(6)}</strong></td><td><ComponentBars components={row.components} /></td><td><details><summary>Why this matched</summary><dl className="evidence-list"><dt>Strictness</dt><dd>{row.matchLevel.replaceAll("_", " ")}</dd><dt>Matched words</dt><dd>{row.matchedTokens.map((token: JsonObject) => `${token.sourceSurface} ↔ ${token.targetSurface} (${token.level.replaceAll("_", " ")})`).join(", ") || "None"}</dd><dt>Phrase tiers</dt><dd>{row.matchedPhrases.map((phrase: JsonObject) => `${phrase.tokens.join(" ")} (${phrase.level.replaceAll("_", " ")} × ${phrase.multiplier})`).join("; ") || "None"}</dd><dt>Capitalization</dt><dd>{row.capitalizationEvidence.map((item: JsonObject) => `${item.sourceSurface} ↔ ${item.targetSurface}: ${item.multiplier}`).join(", ") || "None"}</dd><dt>Rare words</dt><dd>{row.rareTokens.map((token: JsonObject) => `${token.token} (df ${token.documentFrequency})`).join(", ") || "None"}</dd><dt>Candidate reason</dt><dd>{row.candidateReasons.join(", ")}</dd><dt>Tie-break</dt><dd>{row.tieBreak}</dd></dl></details></td></tr>)}</tbody></table></div></section>;
 }
 
 function CompareResult({ data }: { data: JsonObject }) {

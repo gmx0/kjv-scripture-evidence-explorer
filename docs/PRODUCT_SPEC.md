@@ -45,6 +45,7 @@ The user selects two or more passages. The app displays common exact tokens, com
 | FR-10 | Resolve absent modern terms through a cited, cached, user-selected dictionary sense. |
 | FR-11 | Permit curated cross-references only as a separately labeled source layer. |
 | FR-12 | Offer a local API with stable, validated response schemas. |
+| FR-13 | Offer explicit letter-exact, exact-spelling, and normalized ranking strictness, and expose capitalization as edition-specific evidence. |
 
 ## WHGW-style study operations
 
@@ -70,6 +71,8 @@ Every edge or result must carry one or more visible labels:
 - `configured_cross_reference`
 - `external_synonym_bridge`
 - `generated_summary`
+
+Matched token and phrase records additionally identify their strongest tier: `case_exact`, `case_folded`, or `normalized`.
 
 ## MVP exclusions
 

@@ -6,7 +6,7 @@ import type { CorpusManifest } from "../../../../packages/shared/src/index.ts";
 export interface CorpusIdentity {
   corpusVersion: string;
   canonicalSha256: string;
-  algorithmVersion: "1.0.0";
+  algorithmVersion: "1.1.0";
 }
 
 export interface CorpusRepository {
@@ -54,7 +54,7 @@ export async function createFileCorpusRepository(options: {
     identity: {
       corpusVersion: manifest.corpusVersion,
       canonicalSha256: manifest.canonicalSha256,
-      algorithmVersion: "1.0.0",
+      algorithmVersion: "1.1.0",
     },
     async allVerses() { return verses; },
   };

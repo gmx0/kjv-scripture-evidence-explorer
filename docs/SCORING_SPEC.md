@@ -1,6 +1,6 @@
 # Deterministic Scoring Specification
 
-Status: accepted as algorithm version `1.0.0` after Phase 1 golden-query review.
+Status: accepted as algorithm version `1.1.0`. This supersedes the ranking behavior of `1.0.0`; the prior configuration remains versioned history.
 
 ## Overview
 
@@ -8,12 +8,14 @@ Ranking has two stages: candidate generation and scoring. Candidate generation m
 
 ## Candidate generation
 
-For a source passage, collect candidate verses that satisfy at least one enabled condition:
+For a source passage, collect candidate verses that satisfy at least one enabled condition at the selected matching level:
 
-- share a non-zero-weight normalized token;
-- contain an exact phrase of at least two tokens from the source;
+- share a non-zero-weight token under the selected matching level;
+- contain a phrase of at least two tokens under the selected matching level;
 - appear in the configured cross-reference set;
 - match a user-selected expansion term.
+
+The default matching level is `exact_spelling`: identical letters after locale-independent case folding. `letter_exact` requires identical token surfaces, including capitalization. `normalized` permits only explicitly configured spelling or inflection relationships. External dictionary synonyms remain a separate topic-resolution layer and never enter ordinary related-verse candidate generation.
 
 Exclude the source verse itself by default. Apply user book/testament/range filters before final scoring. Record which condition admitted each candidate.
 
@@ -42,10 +44,16 @@ J(A,B) = sum(weight(t), t in A intersection B)
 
 ### Phrase score `P`
 
-Find contiguous exact-token spans shared by both passages. Ignore single-token spans. Score the longest non-overlapping spans, rewarding length while capping the result:
+Find contiguous spans shared by both passages at the selected matching level. Ignore single-token spans. Assign each span only its strongest matching tier:
+
+- case-exact: multiplier `1.0`;
+- case-folded exact spelling: multiplier `0.8`;
+- configured normalized relationship: multiplier `0.5`.
+
+Score the longest non-overlapping spans, preventing the same positions from being counted in multiple tiers:
 
 ```text
-P = min(1, sum(length(span)^2) / phrase_cap)
+P = min(1, sum(length(span)^2 * tier_multiplier(span)) / phrase_cap)
 ```
 
 The MVP default `phrase_cap` is `25`. Return every contributing span and its locations.
@@ -72,6 +80,25 @@ O = order_ratio * gap_factor
 
 Define empty denominators as `0`. Return alignment pairs.
 
+### Capitalization fidelity `K`
+
+For aligned shared tokens, weight capitalization fidelity by the same rarity weight used by lexical scoring:
+
+```text
+K = sum(weight(t) * capitalization_multiplier(t)) / sum(weight(t))
+```
+
+Use these deterministic position-aware multipliers:
+
+| Relationship in this corpus edition | Multiplier |
+|---|---:|
+| Identical capitalization away from a verse or sentence start | 1.00 |
+| Identical capitalization where either occurrence begins a verse or sentence | 0.50 |
+| Capitalization differs and exactly one occurrence begins a verse or sentence | 0.25 |
+| Other capitalization difference | 0.00 |
+
+Sentence starts are detected from the preserved display text using the previous token boundary and `.`, `!`, or `?`. Capitalization is evidence about the selected corpus edition only; it is not original-language evidence or a claim about every KJV printing.
+
 ### Configured cross-reference score `C`
 
 `C = 1` when the source/candidate pair exists in the enabled, versioned cross-reference dataset; otherwise `0`. This component must be visibly labeled editorial rather than lexical.
@@ -79,7 +106,7 @@ Define empty denominators as `0`. Return alignment pairs.
 ## Default total
 
 ```text
-score_raw = 0.50J + 0.20P + 0.15R + 0.10O + 0.05C
+score_raw = 0.40J + 0.20P + 0.15R + 0.10O + 0.10K + 0.05C
 score = round(score_raw, 6)
 ```
 
@@ -113,10 +140,13 @@ Every ranked item includes:
 {
   "reference": "...",
   "score": 0.0,
-  "components": {"jaccard": 0.0, "phrase": 0.0, "rare": 0.0, "order": 0.0, "crossReference": 0.0},
+  "components": {"jaccard": 0.0, "phrase": 0.0, "rare": 0.0, "order": 0.0, "capitalization": 0.0, "crossReference": 0.0},
+  "matchLevel": "exact_spelling",
+  "matchedTokens": [],
   "matchedSurfaceTokens": [],
   "matchedNormalizedTokens": [],
   "matchedPhrases": [],
+  "capitalizationEvidence": [],
   "rareTokens": [],
   "alignment": [],
   "candidateReasons": [],
