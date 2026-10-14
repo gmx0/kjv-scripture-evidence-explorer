@@ -1,0 +1,18 @@
+{
+  "corpusVersion": "KJV-PCE-BP-2010-v1",
+  "algorithmVersion": "2.2.0",
+  "bounds": {
+    "version": "KJV-PCE-BP-2010-v1-bounds-1",
+    "totalTokens": 789662,
+    "verses": 31102,
+    "vocabulary": 12756,
+    "verseWords": {"min": 2, "median": 24, "p95": 46, "max": 90},
+    "wordLetters": {"min": 1, "median": 7, "p95": 11, "max": 18},
+    "corpusFrequency": {"min": 1, "median": 3, "p95": 117, "max": 63919},
+    "repetition": {"maxWithinVerse": 18},
+    "uniqueWords": {"maxWithinVerse": 53, "minimumVerseRatio": 0.29545454545454547},
+    "canonicalStructure": {"maxVersesPerChapter": 176, "maxChaptersPerBook": 150},
+    "exactRepeatedText": {"groups": 119, "maximumMultiplicity": 72},
+    "provenance": "Computed with the live Unicode-aware tokenizer over data/kjv/verses.jsonl."
+  }
+}
