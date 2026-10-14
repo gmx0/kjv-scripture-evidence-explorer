@@ -6,6 +6,7 @@ const vocabulary=new Set(["free","will","self","freewill","selfwill","selfwilled
 assert.deepEqual(wordFeatures("freewill",vocabulary).components,new Set(["free","will"]));
 assert(lemmaCandidates("selfwilled").includes("selfwill"));
 assert.equal(morphologyBetween("freewill","selfwill",vocabulary,()=>1).kind,"compound_component");
+assert.doesNotThrow(()=>morphologyBetween("selfwilled","selfwill",vocabulary,()=>1));
 const four=bestLetterPattern("freewill","selfwill",()=>1,vocabulary.size);
 const one=bestLetterPattern("free","work",()=>1,vocabulary.size);
 assert.equal(four.fragment,"will");
