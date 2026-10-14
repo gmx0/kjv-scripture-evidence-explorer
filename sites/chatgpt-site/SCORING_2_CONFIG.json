@@ -1,0 +1,30 @@
+{
+  "algorithmVersion": "2.2.0",
+  "corpusBounds": "dist/data/kjv/corpus-bounds.json",
+  "weights": {
+    "jaccard": 0.35,
+    "phrase": 0.25,
+    "rare": 0.25,
+    "order": 0.08,
+    "capitalization": 0.03,
+    "morphology": 0.02,
+    "letterPattern": 0.01,
+    "crossReference": 0.01
+  },
+  "phraseGapDecay": 0.7,
+  "compoundGapDecay": 0.5,
+  "wordLengthNormalization": "ln(1 + letters) / ln(1 + corpus_max_letters)",
+  "repetitionNormalization": "ln(1 + count) / ln(1 + corpus_max_within_verse)",
+  "phraseNormalization": "(phrase_words / shorter_verse_words)^1.5",
+  "letterPatternMultipliers": {
+    "prefix": 1.0,
+    "suffix": 1.0,
+    "internalSubstring": 0.75,
+    "orderedLetters": 0.25,
+    "unorderedLetters": 0.10
+  },
+  "roundingDecimalPlaces": 6,
+  "candidateQuota": 5000,
+  "nonIdentityScoreCap": 0.984999,
+  "notes": "Textual facts remain exact; normalizers use measured corpus bounds. Pruned means not evaluated, not zero similarity."
+}
