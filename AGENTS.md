@@ -41,8 +41,12 @@ Before implementing a task:
 - Store canonical book/chapter/verse identifiers separately from display labels.
 - Use integer or fixed-precision arithmetic for final ranking where practical. If floating point is used internally, define rounding before sorting.
 - Sort tied results by the exact rules in `docs/SCORING_SPEC.md`; never rely on database row order.
-- Treat stop words as data. Keep them searchable in exact mode; down-weight rather than erase them in similarity mode.
-- Require the user to choose a dictionary sense when a term is ambiguous before expanding it to KJV vocabulary.
+- Treat stop words as data. Keep them searchable and give them corpus-derived low weight rather than zero weight; their order inside phrases and constructions remains evidence.
+- Treat morphology as derived evidence. Compound parts, roots, prefixes, and suffixes must never be presented as exact-word matches.
+- Do not infer roots or compounds from arbitrary character overlap. Use versioned rules or reviewed lexical mappings, and return the rule behind every match.
+- Any shared letter pattern may contribute a small, capped score, including a single shared letter. Apply the specified steep decay and rarity weighting; label it as character overlap, never as proof of a shared root.
+- Prefer continuous evidence decay to semantic cutoffs. Thresholds may control computation or default display, but must not be reported as though omitted evidence had a score of zero.
+- Prefer user selection for ambiguous dictionary senses. If none is selected, permit only separately labeled per-sense exploratory branches with reduced confidence; never silently merge senses into one meaning.
 - Cache external definition responses with provider, URL, retrieval date, license, selected sense, and normalized synonym candidates.
 - Never expose secret keys to the browser or commit them.
 - Do not add analytics, authentication, collaborative notes, AI commentary, or additional Bible translations to the MVP unless the product spec is amended.

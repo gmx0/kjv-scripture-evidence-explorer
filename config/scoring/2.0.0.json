@@ -1,0 +1,28 @@
+{
+  "algorithmVersion": "2.0.0",
+  "phraseCap": 25,
+  "rareCap": 3,
+  "weights": {
+    "jaccard": 0.30,
+    "phrase": 0.20,
+    "rare": 0.10,
+    "order": 0.10,
+    "capitalization": 0.10,
+    "morphology": 0.10,
+    "letterPattern": 0.05,
+    "crossReference": 0.05
+  },
+  "phraseGapDecay": 0.7,
+  "compoundGapDecay": 0.5,
+  "letterLengthDecay": 2.3,
+  "letterPatternMultipliers": {
+    "prefix": 1.0,
+    "suffix": 1.0,
+    "internalSubstring": 0.75,
+    "orderedLetters": 0.25,
+    "unorderedLetters": 0.10
+  },
+  "roundingDecimalPlaces": 6,
+  "candidateQuota": 5000,
+  "notes": "Textual facts remain exact; weak evidence decays continuously. Pruned means not evaluated, not zero similarity."
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Versioned search and ranking algorithm for the KJV Scripture Evidence Explorer.">
+  <title>Algorithm 2.0 · KJV Scripture Evidence Explorer</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body><main>
+  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.0</a></nav>
+  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.0</h1><p class="lede">The implementation described here is versioned with the live workbench. Textual facts remain exact; evidentiary strength decays continuously instead of disappearing at arbitrary cutoffs.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.0.0</strong></div></header>
+  <article class="prose-page">
+    <aside class="principle"><strong>Versioning rule</strong><p>Any change to formulas, component meanings, default weights, normalization, pruning, or tie-breaking requires a new algorithm version and a corresponding revision of this page.</p></aside>
+
+    <h2>Pipeline</h2>
+    <ol>
+      <li>Preserve exact KJV text, case, offsets, and token position.</li>
+      <li>Interpret the query as a reference, word, phrase, comparison, or modern topic.</li>
+      <li>Generate separate candidate tiers from exact, phrase, morphological, letter-pattern, cross-reference, and topic-bridge evidence.</li>
+      <li>Union and de-duplicate candidates.</li>
+      <li>Calculate all applicable components and retain their explanations.</li>
+      <li>Apply deterministic weights, rounding, and tie-breaking.</li>
+    </ol>
+
+    <h2>Total score</h2>
+    <div class="formula">Score = 0.30J + 0.20P + 0.10R + 0.10O + 0.10K + 0.10M + 0.05L + 0.05C</div>
+    <table class="algorithm-table"><thead><tr><th>Symbol</th><th>Weight</th><th>Evidence</th></tr></thead><tbody>
+      <tr><td>J</td><td>30%</td><td>IDF-weighted shared vocabulary</td></tr>
+      <tr><td>P</td><td>20%</td><td>Exact phrases and ordered near-phrases</td></tr>
+      <tr><td>R</td><td>10%</td><td>Continuous rarity of shared words</td></tr>
+      <tr><td>O</td><td>10%</td><td>Preserved order and proximity</td></tr>
+      <tr><td>K</td><td>10%</td><td>Capitalization fidelity, discounted at sentence starts</td></tr>
+      <tr><td>M</td><td>10%</td><td>Lemmas, roots, compounds, and validated affixes</td></tr>
+      <tr><td>L</td><td>5%</td><td>Raw prefixes, suffixes, substrings, and shared letters</td></tr>
+      <tr><td>C</td><td>5%</td><td>Separately labeled editorial cross-references</td></tr>
+    </tbody></table>
+
+    <h2>Vocabulary and rarity</h2>
+    <div class="formula">idf(t) = ln((N + 1) / (df(t) + 1)) + 1</div>
+    <p>Common words retain low nonzero weight. The system does not erase stop words because their order can distinguish constructions such as <code>faith in</code>, <code>faith of</code>, and <code>justified by</code>. Rarity is continuous rather than determined by a hard percentile.</p>
+
+    <h2>Phrases and distance</h2>
+    <div class="formula">gap decay = exp(−0.7 × intervening words)</div>
+    <p>Adjacent exact words receive the strongest phrase evidence. Ordered words separated by intervening text receive progressively less. A single aligned word receives only a small phrase/order contribution rather than being declared nonexistent.</p>
+
+    <h2>Morphology and compounds</h2>
+    <p>Relationship strength begins with the following values and is multiplied by source confidence, contextual compatibility, and component rarity:</p>
+    <table class="algorithm-table"><thead><tr><th>Relationship</th><th>Base value</th></tr></thead><tbody><tr><td>Inflectional lemma</td><td>0.80</td></tr><tr><td>Root or derivational family</td><td>0.65</td></tr><tr><td>Compound component</td><td>0.50</td></tr><tr><td>Validated prefix and retained base</td><td>0.20</td></tr><tr><td>Validated suffix and retained base</td><td>0.15</td></tr></tbody></table>
+    <p>Compound distance decays as <code>exp(−0.5 × intervening words)</code>. Thus <code>freewill</code> can surface <code>free</code>, <code>will</code>, and a sibling such as <code>selfwilled</code>, while showing the path and never claiming that the forms are synonyms.</p>
+
+    <h2>Raw letter evidence</h2>
+    <div class="formula">Lpair = coverage³ × rarity × length decay × pattern multiplier</div>
+    <p>Prefixes and suffixes receive multiplier 1.00; internal substrings 0.75; ordered noncontiguous letters 0.25; unordered letters 0.10. One-letter overlap remains nonzero but receives length decay of about 0.001. Two letters receive about 0.010, three about 0.100, and four or more 1.000 before coverage and rarity reductions.</p>
+
+    <h2>No double counting</h2>
+    <p>For a word pair, the scorer uses its strongest established relationship: exact word, lemma, root, compound, validated affix, contiguous letters, ordered letters, then unordered letters. Weaker facts remain visible in the explanation but are not added again.</p>
+
+    <h2>Candidate limits</h2>
+    <p>Potential candidates are generated by tier and pruned deterministically using score upper bounds when necessary. The interface reports discovered, evaluated, and pruned counts. A pruned item means “not evaluated for display,” never “zero similarity.”</p>
+
+    <h2>Stable ordering</h2>
+    <p>Ties resolve by total score, phrase, rarity, capitalization, morphology, letter pattern, shared vocabulary, cross-reference evidence, and finally canonical Bible order.</p>
+
+    <h2>Interpretive boundary</h2>
+    <p>The algorithm measures visible relationships in a versioned corpus. Similarity is evidence for study, not proof that two passages have the same meaning. Dictionary bridges and editorial cross-references remain separate from Scripture-derived evidence.</p>
+  </article>
+  <footer><p><a href="./">Use algorithm 2.0 in the explorer</a></p></footer>
+</main></body></html>
