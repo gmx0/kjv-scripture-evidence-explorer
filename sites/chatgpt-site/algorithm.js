@@ -58,8 +58,9 @@ export function morphologyBetween(a, b, vocabulary, componentRarity = () => 1, f
   let relationship = null;
   if (lemmaShared.length) relationship = {kind:"lemma_or_root",baseValue:.65,shared:lemmaShared};
   if (componentShared.length) relationship = {kind:"compound_component",baseValue:.5,shared:componentShared};
-  for (const pa of fa.prefixes) for (const pb of fb.prefixes) if (pa.affix === pb.affix && fa.lemmas.some(x => fb.lemmas.includes(x))) relationship ||= {kind:"validated_prefix",baseValue:.2,shared:[pa.affix]};
-  for (const sa of fa.suffixes) for (const sb of fb.suffixes) if (sa.affix === sb.affix && fa.lemmas.some(x => fb.lemmas.includes(x))) relationship ||= {kind:"validated_suffix",baseValue:.15,shared:[sa.affix]};
+  const sharesLemma = [...fa.lemmas].some(lemma => fb.lemmas.has(lemma));
+  for (const pa of fa.prefixes) for (const pb of fb.prefixes) if (pa.affix === pb.affix && sharesLemma) relationship ||= {kind:"validated_prefix",baseValue:.2,shared:[pa.affix]};
+  for (const sa of fa.suffixes) for (const sb of fb.suffixes) if (sa.affix === sb.affix && sharesLemma) relationship ||= {kind:"validated_suffix",baseValue:.15,shared:[sa.affix]};
   if (!relationship) return {score:0,kind:null,shared:[],sourceConfidence:0};
   const sourceConfidence = relationship.kind === "compound_component" ? .7 : .7;
   const rarity = relationship.shared.reduce((sum,value) => sum + componentRarity(value), 0) / relationship.shared.length;
