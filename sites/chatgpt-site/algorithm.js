@@ -1,4 +1,4 @@
-export const ALGORITHM_VERSION = "2.1.0";
+export const ALGORITHM_VERSION = "2.2.0";
 
 export const clamp = value => Math.min(1, Math.max(0, value));
 export const round6 = value => Math.round((value + Number.EPSILON) * 1e6) / 1e6;
@@ -7,18 +7,23 @@ export function idf(totalDocuments, documentFrequency) {
   return Math.log((totalDocuments + 1) / (documentFrequency + 1)) + 1;
 }
 
-export function corpusRarity(totalTokens, corpusFrequency) {
-  if (totalTokens <= 0) return 0;
-  return clamp(Math.log((totalTokens + 1) / (Math.max(0, corpusFrequency) + 1)) / Math.log(totalTokens + 1));
+export function corpusRarity(maxCorpusFrequency, corpusFrequency, minCorpusFrequency = 1) {
+  const maximum = Math.max(minCorpusFrequency, maxCorpusFrequency), frequency = Math.max(minCorpusFrequency, corpusFrequency);
+  const denominator = 1 + Math.log((maximum + 1) / (minCorpusFrequency + 1));
+  return round6(clamp((1 + Math.log((maximum + 1) / (frequency + 1))) / denominator));
 }
 
-export function wordLengthValue(input) {
+export function wordLengthValue(input, maxWordLetters = 18) {
   const length = [...String(input)].filter(char => /\p{L}/u.test(char)).length;
-  return round6(1 - Math.exp(-length / 4));
+  return round6(clamp(Math.log(1 + length) / Math.log(1 + Math.max(1, maxWordLetters))));
 }
 
-export function exactWordEvidence(input, rarity) {
-  return round6(wordLengthValue(input) * (.30 + .70 * clamp(rarity)));
+export function exactWordEvidence(input, rarity, maxWordLetters = 18) {
+  return round6(wordLengthValue(input, maxWordLetters) * (.30 + .70 * clamp(rarity)));
+}
+
+export function repetitionValue(count, maxWithinVerse = 18) {
+  return round6(clamp(Math.log(1 + Math.max(0, count)) / Math.log(1 + Math.max(1, maxWithinVerse))));
 }
 
 export function rarityConcentration(shared, rarityFor, cap = 2) {
@@ -93,7 +98,7 @@ function longestSubstring(a,b){const row=new Array(b.length+1).fill(0);let best=
 function orderedSubsequence(a,b){const rows=Array.from({length:a.length+1},()=>new Array(b.length+1).fill(""));for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)rows[i][j]=a[i-1]===b[j-1]?rows[i-1][j-1]+a[i-1]:(rows[i-1][j].length>=rows[i][j-1].length?rows[i-1][j]:rows[i][j-1]);return rows[a.length][b.length];}
 function unorderedIntersection(a,b){const counts=new Map();for(const char of b)counts.set(char,(counts.get(char)||0)+1);let result="";for(const char of a)if(counts.get(char)){result+=char;counts.set(char,counts.get(char)-1);}return result;}
 
-export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabularySize = 1) {
+export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabularySize = 1, maxWordLetters = 18) {
   const a=aInput.toLowerCase(),b=bInput.toLowerCase();
   const patterns=[
     {kind:"raw_prefix",fragment:commonPrefix(a,b),multiplier:1},
@@ -105,11 +110,11 @@ export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabular
   let best={score:0,kind:null,fragment:"",sharedLength:0,coverage:0,rarity:0,lengthDecay:0};
   for(const pattern of patterns){
     const n=pattern.fragment.length;if(!n)continue;
-    const coverage=n/Math.max(a.length,b.length),lengthDecay=Math.exp(-2.3*Math.max(0,4-n));
+    const coverage=n/Math.max(a.length,b.length),absoluteLength=Math.log(1+n)/Math.log(1+Math.max(1,maxWordLetters));
     const count=Math.max(1,frequency(pattern.fragment,pattern.kind));
     const rarity=Math.log((vocabularySize+1)/(count+1))/Math.log(vocabularySize+1);
-    const score=coverage**3*rarity*lengthDecay*pattern.multiplier;
-    if(score>best.score)best={...pattern,score:round6(score),sharedLength:n,coverage:round6(coverage),rarity:round6(rarity),lengthDecay:round6(lengthDecay)};
+    const score=coverage**3*absoluteLength*rarity*pattern.multiplier;
+    if(score>best.score)best={...pattern,score:round6(score),sharedLength:n,coverage:round6(coverage),rarity:round6(rarity),absoluteLength:round6(absoluteLength)};
   }
   return best;
 }
@@ -147,5 +152,5 @@ export function nearPhraseEvidence(a,b){
 }
 
 export function totalScore(components) {
-  return round6(.35*components.jaccard+.22*components.phrase+.25*components.rare+.08*components.order+.04*components.capitalization+.03*components.morphology+.02*components.letterPattern+.01*components.crossReference);
+  return round6(.35*components.jaccard+.25*components.phrase+.25*components.rare+.08*components.order+.03*components.capitalization+.02*components.morphology+.01*components.letterPattern+.01*components.crossReference);
 }
