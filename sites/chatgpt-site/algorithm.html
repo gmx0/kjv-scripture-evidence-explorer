@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Versioned search and ranking algorithm for the KJV Scripture Evidence Explorer.">
-  <title>Algorithm 2.0 · KJV Scripture Evidence Explorer</title>
+  <title>Algorithm 2.1 · KJV Scripture Evidence Explorer</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body><main>
-  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.0</a></nav>
-  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.0</h1><p class="lede">The implementation described here is versioned with the live workbench. Textual facts remain exact; evidentiary strength decays continuously instead of disappearing at arbitrary cutoffs.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.0.0</strong></div></header>
+  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.1</a></nav>
+  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.1</h1><p class="lede">Rarity now comes from total KJV corpus occurrences, exact-word evidence increases with word length, phrase evidence increases with matched wording, and complete repeated verses receive maximum textual weight.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.1.0</strong></div></header>
   <article class="prose-page">
     <aside class="principle"><strong>Versioning rule</strong><p>Any change to formulas, component meanings, default weights, normalization, pruning, or tie-breaking requires a new algorithm version and a corresponding revision of this page.</p></aside>
 
@@ -24,25 +24,30 @@
     </ol>
 
     <h2>Total score</h2>
-    <div class="formula">Score = 0.30J + 0.20P + 0.10R + 0.10O + 0.10K + 0.10M + 0.05L + 0.05C</div>
+    <div class="formula">Score = 0.35W + 0.22P + 0.25R + 0.08O + 0.04K + 0.03M + 0.02L + 0.01C</div>
     <table class="algorithm-table"><thead><tr><th>Symbol</th><th>Weight</th><th>Evidence</th></tr></thead><tbody>
-      <tr><td>J</td><td>30%</td><td>IDF-weighted shared vocabulary</td></tr>
-      <tr><td>P</td><td>20%</td><td>Exact phrases and ordered near-phrases</td></tr>
-      <tr><td>R</td><td>10%</td><td>Continuous rarity of shared words</td></tr>
-      <tr><td>O</td><td>10%</td><td>Preserved order and proximity</td></tr>
-      <tr><td>K</td><td>10%</td><td>Capitalization fidelity, discounted at sentence starts</td></tr>
-      <tr><td>M</td><td>10%</td><td>Lemmas, roots, compounds, and validated affixes</td></tr>
-      <tr><td>L</td><td>5%</td><td>Raw prefixes, suffixes, substrings, and shared letters</td></tr>
-      <tr><td>C</td><td>5%</td><td>Separately labeled editorial cross-references</td></tr>
+      <tr><td>W</td><td>35%</td><td>Exact-word overlap weighted by corpus rarity, word length, and diminishing repeated occurrences</td></tr>
+      <tr><td>P</td><td>22%</td><td>Exact phrases and ordered near-phrases, increasing with phrase length</td></tr>
+      <tr><td>R</td><td>25%</td><td>Continuous corpus-occurrence rarity of shared words</td></tr>
+      <tr><td>O</td><td>8%</td><td>Preserved word order and alignment</td></tr>
+      <tr><td>K</td><td>4%</td><td>Capitalization fidelity, discounted at sentence starts</td></tr>
+      <tr><td>M</td><td>3%</td><td>Lemmas, roots, compounds, and validated affixes</td></tr>
+      <tr><td>L</td><td>2%</td><td>Raw prefixes, suffixes, substrings, and shared letters</td></tr>
+      <tr><td>C</td><td>1%</td><td>Separately labeled editorial cross-references</td></tr>
     </tbody></table>
 
     <h2>Vocabulary and rarity</h2>
-    <div class="formula">idf(t) = ln((N + 1) / (df(t) + 1)) + 1</div>
-    <p>Common words retain low nonzero weight. The system does not erase stop words because their order can distinguish constructions such as <code>faith in</code>, <code>faith of</code>, and <code>justified by</code>. Rarity is continuous rather than determined by a hard percentile.</p>
+    <div class="formula">rarity(t) = ln((T + 1) / (cf(t) + 1)) ÷ ln(T + 1)</div>
+    <p><code>T</code> is the total number of word occurrences in the KJV corpus and <code>cf(t)</code> is the total number of occurrences of the word. Higher rarity gives a higher score. Common words retain low nonzero weight.</p>
+    <div class="formula">length(t) = 1 − exp(−letters(t) / 4)<br>word evidence(t) = length(t) × (0.30 + 0.70 × rarity(t))</div>
+    <p>Longer exact words therefore contribute more than shorter exact words. Repeated matched occurrences add evidence with logarithmic diminishing returns.</p>
 
     <h2>Phrases and distance</h2>
-    <div class="formula">gap decay = exp(−0.7 × intervening words)</div>
-    <p>Adjacent exact words receive the strongest phrase evidence. Ordered words separated by intervening text receive progressively less. A single aligned word receives only a small phrase/order contribution rather than being declared nonexistent.</p>
+    <div class="formula">phrase evidence = matched word evidence × phrase length<sup>1.5</sup> × exp(−0.7 × intervening words)</div>
+    <p>Longer exact phrases grow substantially stronger. Ordered words separated by intervening text receive progressively less.</p>
+
+    <h2>Complete repeated verses</h2>
+    <p>Exact displayed KJV text receives textual score <code>1.000</code>. A complete surface-token sequence receives <code>0.995</code>; a complete case-folded sequence receives <code>0.985</code>. Nonidentical passages are capped below <code>1.000</code>. Canonical proximity is kept separate and breaks ties among equally strong textual matches.</p>
 
     <h2>Morphology and compounds</h2>
     <p>Relationship strength begins with the following values and is multiplied by source confidence, contextual compatibility, and component rarity:</p>
@@ -60,10 +65,10 @@
     <p>Potential candidates are generated by tier and pruned deterministically using score upper bounds when necessary. The interface reports discovered, evaluated, and pruned counts. A pruned item means “not evaluated for display,” never “zero similarity.”</p>
 
     <h2>Stable ordering</h2>
-    <p>Ties resolve by total score, phrase, rarity, capitalization, morphology, letter pattern, shared vocabulary, cross-reference evidence, and finally canonical Bible order.</p>
+    <p>Ties resolve by textual score, complete-verse identity, canonical proximity, phrase score, corpus rarity, capitalization, morphology, letter pattern, and finally canonical Bible order.</p>
 
     <h2>Interpretive boundary</h2>
     <p>The algorithm measures visible relationships in a versioned corpus. Similarity is evidence for study, not proof that two passages have the same meaning. Dictionary bridges and editorial cross-references remain separate from Scripture-derived evidence.</p>
   </article>
-  <footer><p><a href="./">Use algorithm 2.0 in the explorer</a></p></footer>
+  <footer><p><a href="./">Use algorithm 2.1 in the explorer</a></p></footer>
 </main></body></html>
