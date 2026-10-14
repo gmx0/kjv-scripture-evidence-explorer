@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
-import {ALGORITHM_VERSION,bestLetterPattern,caseEvidence,lemmaCandidates,morphologyBetween,totalScore,wordFeatures} from "../dist/algorithm.js";
+import {ALGORITHM_VERSION,bestLetterPattern,caseEvidence,corpusRarity,exactWordEvidence,lemmaCandidates,morphologyBetween,totalScore,wordFeatures,wordLengthValue} from "../dist/algorithm.js";
 
-assert.equal(ALGORITHM_VERSION,"2.0.0");
+assert.equal(ALGORITHM_VERSION,"2.1.0");
 const vocabulary=new Set(["free","will","self","freewill","selfwill","selfwilled"]);
 assert.deepEqual(wordFeatures("freewill",vocabulary).components,new Set(["free","will"]));
 assert(lemmaCandidates("selfwilled").includes("selfwill"));
 assert.equal(morphologyBetween("freewill","selfwill",vocabulary,()=>1).kind,"compound_component");
 assert.doesNotThrow(()=>morphologyBetween("selfwilled","selfwill",vocabulary,()=>1));
+assert(corpusRarity(1000,1)>corpusRarity(1000,100));
+assert(wordLengthValue("will")>wordLengthValue("the"));
+assert(exactWordEvidence("will",.5)>exactWordEvidence("the",.5));
+assert(exactWordEvidence("rareword",.9)>exactWordEvidence("the",.1));
 const four=bestLetterPattern("freewill","selfwill",()=>1,vocabulary.size);
 const one=bestLetterPattern("free","work",()=>1,vocabulary.size);
 assert.equal(four.fragment,"will");
