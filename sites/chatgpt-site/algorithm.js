@@ -1,4 +1,4 @@
-export const ALGORITHM_VERSION = "2.3.0";
+export const ALGORITHM_VERSION = "2.4.0";
 
 export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,line:33});
 export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
@@ -77,22 +77,26 @@ export function wordFeatures(input, vocabulary = new Set()) {
 
 function intersection(a, b) { return [...a].filter(value => b.has(value)); }
 
-export function morphologyBetween(a, b, vocabulary, componentRarity = () => 1, featuresA = null, featuresB = null) {
-  const fa = featuresA || wordFeatures(a, vocabulary), fb = featuresB || wordFeatures(b, vocabulary);
-  const lemmaShared = intersection(fa.lemmas, fb.lemmas).filter(value => value !== a || value !== b);
-  const componentShared = intersection(fa.components, fb.components);
-  if (fa.components.has(b)) componentShared.push(b);
-  if (fb.components.has(a)) componentShared.push(a);
-  let relationship = null;
-  if (lemmaShared.length) relationship = {kind:"lemma_or_root",baseValue:.65,shared:lemmaShared};
-  if (componentShared.length) relationship = {kind:"compound_component",baseValue:.5,shared:componentShared};
-  const sharesLemma = [...fa.lemmas].some(lemma => fb.lemmas.has(lemma));
-  for (const pa of fa.prefixes) for (const pb of fb.prefixes) if (pa.affix === pb.affix && sharesLemma) relationship ||= {kind:"validated_prefix",baseValue:.2,shared:[pa.affix]};
-  for (const sa of fa.suffixes) for (const sb of fb.suffixes) if (sa.affix === sb.affix && sharesLemma) relationship ||= {kind:"validated_suffix",baseValue:.15,shared:[sa.affix]};
-  if (!relationship) return {score:0,kind:null,shared:[],sourceConfidence:0};
-  const sourceConfidence = relationship.kind === "compound_component" ? .7 : .7;
-  const rarity = relationship.shared.reduce((sum,value) => sum + componentRarity(value), 0) / relationship.shared.length;
-  return {...relationship,sourceConfidence,componentRarity:round6(rarity),contextCompatibility:1,score:round6(relationship.baseValue * sourceConfidence * rarity)};
+export function morphologyBetween(aInput, bInput, vocabulary, segmentEvidence = () => 1) {
+  const a=aInput.toLowerCase(),b=bInput.toLowerCase();
+  if(!a||!b)return {score:0,kind:null,shared:[],measurements:null};
+  const candidates=[
+    {kind:"shared_initial_segment",fragment:commonPrefix(a,b),position:"initial"},
+    {kind:"shared_terminal_segment",fragment:commonSuffix(a,b),position:"terminal"},
+    {kind:"shared_internal_segment",fragment:longestSubstring(a,b),position:"internal"},
+  ];
+  let best={score:0,kind:null,shared:[],measurements:null};
+  for(const candidate of candidates){
+    const n=candidate.fragment.length;if(!n)continue;
+    const lengthValue=wordLengthValue(candidate.fragment,Math.max(a.length,b.length));
+    const sourceCoverage=n/a.length,targetCoverage=n/b.length,coverage=Math.sqrt(sourceCoverage*targetCoverage);
+    const observed=segmentEvidence(candidate.fragment,candidate.position);
+    const rarity=typeof observed==="number"?observed:observed.rarity;
+    const positionalExactness=candidate.position==="internal"?.5*(Number(a.includes(candidate.fragment))+Number(b.includes(candidate.fragment))):1;
+    const score=round6(clamp(lengthValue*coverage*rarity*positionalExactness));
+    if(score>best.score)best={...candidate,score,shared:[candidate.fragment],measurements:{letters:n,lengthValue:round6(lengthValue),sourceCoverage:round6(sourceCoverage),targetCoverage:round6(targetCoverage),coverage:round6(coverage),rarity:round6(rarity),positionalExactness:round6(positionalExactness),corpusFrequency:observed?.frequency??null,independentTokenFrequency:observed?.independentTokenFrequency??null}};
+  }
+  return best;
 }
 
 function commonPrefix(a,b){let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;return a.slice(0,i);}
@@ -106,9 +110,9 @@ export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabular
   const patterns=[
     {kind:"raw_prefix",fragment:commonPrefix(a,b),multiplier:1},
     {kind:"raw_suffix",fragment:commonSuffix(a,b),multiplier:1},
-    {kind:"raw_substring",fragment:longestSubstring(a,b),multiplier:.75},
-    {kind:"ordered_letters",fragment:orderedSubsequence(a,b),multiplier:.25},
-    {kind:"unordered_letters",fragment:unorderedIntersection(a,b),multiplier:.1},
+    {kind:"raw_substring",fragment:longestSubstring(a,b),multiplier:1},
+    {kind:"ordered_letters",fragment:orderedSubsequence(a,b),multiplier:1},
+    {kind:"unordered_letters",fragment:unorderedIntersection(a,b),multiplier:1},
   ];
   let best={score:0,kind:null,fragment:"",sharedLength:0,coverage:0,rarity:0,lengthDecay:0};
   for(const pattern of patterns){
@@ -131,11 +135,13 @@ export function caseEvidence(a, b, initialCount=0) {
   const aa=[...a].filter(char=>/\p{L}/u.test(char)),bb=[...b].filter(char=>/\p{L}/u.test(char)),length=Math.min(aa.length,bb.length);
   if(!length)return {score:0,caseSimilarity:0,initialInformation:0};
   let matching=0;for(let i=0;i<length;i++)if((aa[i]===aa[i].toUpperCase())===(bb[i]===bb[i].toUpperCase()))matching++;
-  const caseSimilarity=matching/length,initialInformation=1/(1+.5*initialCount);
-  return {score:round6(caseSimilarity*initialInformation),caseSimilarity:round6(caseSimilarity),initialInformation:round6(initialInformation)};
+  let upperMatches=0,lowerMatches=0,caseMismatches=0;
+  for(let i=0;i<length;i++){const au=aa[i]===aa[i].toUpperCase(),bu=bb[i]===bb[i].toUpperCase();if(au!==bu)caseMismatches++;else if(au)upperMatches++;else lowerMatches++;}
+  const caseSimilarity=matching/Math.max(aa.length,bb.length);
+  return {score:round6(caseSimilarity),caseSimilarity:round6(caseSimilarity),exactCaseMatches:matching,upperMatches,lowerMatches,caseMismatches,comparedLetters:length,initialInformation:1};
 }
 
-export function nearPhraseEvidence(a,b){
+export function nearPhraseEvidence(a,b,maxGap=89){
   const evidence=[];
   for(let i=0;i<a.length;i++){
     for(let j=i;j<a.length;j++){
@@ -145,7 +151,7 @@ export function nearPhraseEvidence(a,b){
         if(previous>=0)totalGap+=Math.max(0,found-previous-1);previous=found;cursor=found;
       }
       if(!valid)continue;
-      const length=j-i+1,gapDecay=Math.exp(-.7*totalGap),lengthFactor=length===1?.1:length**2;
+      const length=j-i+1,gapDecay=(1+Math.log((Math.max(1,maxGap)+1)/(Math.min(totalGap,maxGap)+1)))/(1+Math.log(Math.max(1,maxGap)+1)),lengthFactor=Math.log1p(length)/Math.log1p(Math.max(1,Math.min(a.length,b.length)));
       evidence.push({tokens:a.slice(i,j+1),sourceStart:i,targetStart:b.indexOf(a[i]),length,totalGap,gapDecay:round6(gapDecay),value:round6(lengthFactor*gapDecay)});
     }
   }
@@ -160,9 +166,10 @@ function weightedByCounts(values, counts) {
 }
 
 export function textualSelfRecursiveScore(components) {
-  const word=clamp(.60*components.jaccard+.30*components.rare+.10*components.morphology);
-  const letter=clamp(.75*components.letterPattern+.25*components.capitalization);
-  const line=clamp(.70*components.phrase+.30*components.order);
+  const recursive=values=>{const observed=values.filter(value=>value>0),sum=observed.reduce((a,b)=>a+b,0);return sum?clamp(observed.reduce((a,b)=>a+b*b,0)/sum):0;};
+  const word=recursive([components.jaccard,components.rare,components.morphology]);
+  const letter=recursive([components.letterPattern,components.capitalization]);
+  const line=recursive([components.phrase,components.order]);
   return {score:weightedByCounts({word,letter,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),line:round6(line)}};
 }
 
