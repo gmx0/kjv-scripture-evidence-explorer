@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {ALGORITHM_VERSION,bestLetterPattern,caseEvidence,corpusRarity,exactWordEvidence,lemmaCandidates,morphologyBetween,proximitySelfRecursiveScore,repetitionValue,textualSelfRecursiveScore,totalScore,wordFeatures,wordLengthValue} from "../dist/algorithm.js";
 
-assert.equal(ALGORITHM_VERSION,"2.4.0");
+assert.equal(ALGORITHM_VERSION,"2.5.0");
 const vocabulary=new Set(["free","will","self","freewill","selfwill","selfwilled"]);
 assert.deepEqual(wordFeatures("freewill",vocabulary).components,new Set(["free","will"]));
 assert(lemmaCandidates("selfwilled").includes("selfwill"));
@@ -30,6 +30,11 @@ assert.equal(totalScore({jaccard:1,phrase:1,rare:1,order:1,capitalization:1,morp
 const textual=textualSelfRecursiveScore({jaccard:1,phrase:0,rare:1,order:0,capitalization:0,morphology:0,letterPattern:0});
 assert.equal(textual.groups.word,1);
 assert(textual.score>.8);
+const life=textualSelfRecursiveScore({jaccard:.10,rare:.10,morphology:0,phrase:0,letterPattern:0,capitalization:0}).score;
+const everlasting=textualSelfRecursiveScore({jaccard:.20,rare:.20,morphology:0,phrase:0,letterPattern:0,capitalization:0}).score;
+const separated=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,phrase:0,letterPattern:0,capitalization:0}).score;
+const continuous=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,phrase:.50,letterPattern:0,capitalization:0}).score;
+assert(life<everlasting&&everlasting<separated&&separated<continuous);
 assert.equal(proximitySelfRecursiveScore({word:1,book:1,letter:1,verse:1,chapter:1,testament:1}),1);
 assert(proximitySelfRecursiveScore({word:1})>.78);
 console.log("algorithm smoke tests passed");

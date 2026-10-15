@@ -1,4 +1,4 @@
-export const ALGORITHM_VERSION = "2.4.0";
+export const ALGORITHM_VERSION = "2.5.0";
 
 export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,line:33});
 export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
@@ -168,9 +168,9 @@ function weightedByCounts(values, counts) {
 
 export function textualSelfRecursiveScore(components) {
   const recursive=values=>{const observed=values.filter(value=>value>0),sum=observed.reduce((a,b)=>a+b,0);return sum?clamp(observed.reduce((a,b)=>a+b*b,0)/sum):0;};
-  const word=recursive([components.jaccard,components.rare,components.morphology]);
+  const word=recursive([components.jaccard,components.rare,components.morphology,components.phrase]);
   const letter=recursive([components.letterPattern,components.capitalization]);
-  const line=recursive([components.phrase,components.order]);
+  const line=clamp(components.phrase||0);
   return {score:weightedByCounts({word,letter,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),line:round6(line)}};
 }
 

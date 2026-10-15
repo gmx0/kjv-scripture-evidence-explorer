@@ -1,5 +1,5 @@
 {
-  "algorithmVersion": "2.4.0",
+  "algorithmVersion": "2.5.0",
   "corpusBounds": "dist/data/kjv/corpus-bounds.json",
   "selfRecursiveTextualCounts": {"word": 1243, "letter": 71, "line": 33},
   "textualGroupCombination": "For each group, observed component values recursively weight themselves: sum(value^2) / sum(value). No fixed internal percentages.",
@@ -7,7 +7,7 @@
   "phraseGapDecay": "(1 + ln((corpus_max_gap + 1)/(gap + 1))) / (1 + ln(corpus_max_gap + 1))",
   "wordLengthNormalization": "ln(1 + letters) / ln(1 + corpus_max_letters)",
   "repetitionNormalization": "ln(1 + count) / ln(1 + corpus_max_within_verse)",
-  "phraseNormalization": "(phrase_words / shorter_verse_words)^1.5",
+  "exactPhraseTreatment": "An exact continuous phrase of two or more words is a virtual exact word using Word/Words weight, exact phrase occurrence rarity, and concatenated-letter word-length value. It additionally receives the small Line/Verse textual component; the Line contribution does not replace or dilute its Word contribution. Line/Verse also remains a separate canonical-proximity axis.",
   "letterPatternWeights": "No hand-set type multipliers; strength comes from observed length, coverage, position, and corpus fragment/character frequency.",
   "roundingDecimalPlaces": 6,
   "candidateQuota": 5000,
@@ -15,5 +15,5 @@
   "completeSequenceIdentity": "Recursive mean of token identity, surface-token agreement, exact-case characters, punctuation/spacing, and displayed characters; no fixed 0.995/0.985 tiers.",
   "segmentEvidence": "shared letters × coverage of both forms × corpus positional rarity × observed positional exactness",
   "capitalization": "literal case-position agreement only; no grammatical or sentence-initial discount",
-  "notes": "Algorithm 2.4 uses measurable KJV corpus facts without grammatical, semantic, theological, or editorial judgments. Every detected relationship remains positive; pruning means unevaluated, never unrelated."
+  "notes": "Algorithm 2.5 uses measurable KJV corpus facts without grammatical, semantic, theological, or editorial judgments. Exact phrases are virtual exact words. Every detected relationship remains positive; pruning means unevaluated, never unrelated."
 }
