@@ -1,7 +1,8 @@
-export const ALGORITHM_VERSION = "2.6.0";
+export const ALGORITHM_VERSION = "2.7.0";
 
 export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,line:33});
 export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
+export const FINAL_CONCEPT_COUNTS = Object.freeze({textual:1347,neighbour:107});
 
 export const clamp = value => Math.min(1, Math.max(0, value));
 export const round6 = value => Math.round((value + Number.EPSILON) * 1e6) / 1e6;
@@ -187,6 +188,11 @@ export function proximitySelfRecursiveScore(axes) {
   return weightedByCounts(axes,PROXIMITY_CONCEPT_COUNTS);
 }
 
+export function finalEvidenceScore(textual, proximity) {
+  return weightedByCounts({textual,neighbour:proximity},FINAL_CONCEPT_COUNTS);
+}
+
 export function totalScore(components) {
-  return textualSelfRecursiveScore(components).score;
+  const textual=textualSelfRecursiveScore(components).score;
+  return finalEvidenceScore(textual,components.proximity||0);
 }
