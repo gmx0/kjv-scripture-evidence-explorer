@@ -90,11 +90,11 @@ export function morphologyBetween(aInput, bInput, vocabulary, segmentEvidence = 
     const n=candidate.fragment.length;if(!n)continue;
     const lengthValue=wordLengthValue(candidate.fragment,Math.max(a.length,b.length));
     const sourceCoverage=n/a.length,targetCoverage=n/b.length,coverage=Math.sqrt(sourceCoverage*targetCoverage);
-    const observed=segmentEvidence(candidate.fragment,candidate.position);
+    const observed=segmentEvidence(candidate.fragment,candidate.position),editDistance=levenshtein(a,b),transformationExactness=n/(n+editDistance);
     const rarity=typeof observed==="number"?observed:observed.rarity;
     const positionalExactness=candidate.position==="internal"?.5*(Number(a.includes(candidate.fragment))+Number(b.includes(candidate.fragment))):1;
-    const score=round6(clamp(lengthValue*coverage*rarity*positionalExactness));
-    if(score>best.score)best={...candidate,score,shared:[candidate.fragment],measurements:{letters:n,lengthValue:round6(lengthValue),sourceCoverage:round6(sourceCoverage),targetCoverage:round6(targetCoverage),coverage:round6(coverage),rarity:round6(rarity),positionalExactness:round6(positionalExactness),corpusFrequency:observed?.frequency??null,independentTokenFrequency:observed?.independentTokenFrequency??null}};
+    const score=round6(clamp(lengthValue*coverage*rarity*positionalExactness*transformationExactness));
+    if(score>best.score)best={...candidate,score,shared:[candidate.fragment],measurements:{letters:n,lengthValue:round6(lengthValue),sourceCoverage:round6(sourceCoverage),targetCoverage:round6(targetCoverage),coverage:round6(coverage),rarity:round6(rarity),positionalExactness:round6(positionalExactness),editDistance,transformationExactness:round6(transformationExactness),corpusFrequency:observed?.frequency??null,independentTokenFrequency:observed?.independentTokenFrequency??null}};
   }
   return best;
 }
@@ -104,6 +104,7 @@ function commonSuffix(a,b){let i=0;while(i<a.length&&i<b.length&&a.at(-1-i)===b.
 function longestSubstring(a,b){const row=new Array(b.length+1).fill(0);let best=0,end=0;for(let i=1;i<=a.length;i++){for(let j=b.length;j>=1;j--){row[j]=a[i-1]===b[j-1]?row[j-1]+1:0;if(row[j]>best){best=row[j];end=i;}}}return a.slice(end-best,end);}
 function orderedSubsequence(a,b){const rows=Array.from({length:a.length+1},()=>new Array(b.length+1).fill(""));for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)rows[i][j]=a[i-1]===b[j-1]?rows[i-1][j-1]+a[i-1]:(rows[i-1][j].length>=rows[i][j-1].length?rows[i-1][j]:rows[i][j-1]);return rows[a.length][b.length];}
 function unorderedIntersection(a,b){const counts=new Map();for(const char of b)counts.set(char,(counts.get(char)||0)+1);let result="";for(const char of a)if(counts.get(char)){result+=char;counts.set(char,counts.get(char)-1);}return result;}
+function levenshtein(a,b){const row=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let previous=row[0];row[0]=i;for(let j=1;j<=b.length;j++){const held=row[j];row[j]=Math.min(row[j]+1,row[j-1]+1,previous+(a[i-1]===b[j-1]?0:1));previous=held;}}return row[b.length];}
 
 export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabularySize = 1, maxWordLetters = 18) {
   const a=aInput.toLowerCase(),b=bInput.toLowerCase();
@@ -120,7 +121,7 @@ export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabular
     const coverage=n/Math.max(a.length,b.length),absoluteLength=Math.log(1+n)/Math.log(1+Math.max(1,maxWordLetters));
     const count=Math.max(1,frequency(pattern.fragment,pattern.kind));
     const rarity=Math.log((vocabularySize+1)/(count+1))/Math.log(vocabularySize+1);
-    const score=coverage**3*absoluteLength*rarity*pattern.multiplier;
+    const score=coverage*absoluteLength*rarity*pattern.multiplier;
     if(score>best.score)best={...pattern,score:round6(score),sharedLength:n,coverage:round6(coverage),rarity:round6(rarity),absoluteLength:round6(absoluteLength)};
   }
   return best;

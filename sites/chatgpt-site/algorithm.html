@@ -55,7 +55,7 @@
     <p>The maximum observed 90-word verse bounds the gap calculation. Zero-gap phrases are strongest; every observed gap remains positive. No phrase is declared meaningful or trivial.</p>
 
     <h2>Complete repeated verses</h2>
-    <p>Exact displayed KJV text receives textual score <code>1.000</code>. A complete surface-token sequence receives <code>0.995</code>; a complete case-folded sequence receives <code>0.985</code>. Nonidentical passages are capped at <code>0.984999</code>. The 119 exact repeated-text groups are regression-tested.</p>
+    <p>Complete token sequences are measured across token identity, surface tokens, exact-case characters, punctuation and spacing, and displayed characters. These layers recursively combine without fixed identity tiers. Exact repeated displayed text naturally reaches <code>1.000</code> because every measured layer is 1. The 119 exact repeated-text groups are regression-tested.</p>
 
     <h2>Shared segments and transformations</h2>
     <div class="formula">segment = length × geometric coverage of both forms × positional corpus rarity × positional exactness</div>

@@ -12,6 +12,7 @@
   "roundingDecimalPlaces": 6,
   "candidateQuota": 5000,
   "nonIdentityScoreCap": 0.984999,
+  "completeSequenceIdentity": "Recursive mean of token identity, surface-token agreement, exact-case characters, punctuation/spacing, and displayed characters; no fixed 0.995/0.985 tiers.",
   "segmentEvidence": "shared letters × coverage of both forms × corpus positional rarity × observed positional exactness",
   "capitalization": "literal case-position agreement only; no grammatical or sentence-initial discount",
   "notes": "Algorithm 2.4 uses measurable KJV corpus facts without grammatical, semantic, theological, or editorial judgments. Every detected relationship remains positive; pruning means unevaluated, never unrelated."
