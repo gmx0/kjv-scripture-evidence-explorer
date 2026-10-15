@@ -1,4 +1,4 @@
-export const ALGORITHM_VERSION = "2.5.0";
+export const ALGORITHM_VERSION = "2.6.0";
 
 export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,line:33});
 export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
@@ -72,7 +72,9 @@ export function wordFeatures(input, vocabulary = new Set()) {
   }
   const prefixes = PREFIXES.filter(prefix => word.startsWith(prefix) && word.length > prefix.length + 1).map(prefix => ({affix:prefix,base:word.slice(prefix.length)}));
   const suffixes = SUFFIXES.filter(suffix => word.endsWith(suffix) && word.length > suffix.length + 1).map(suffix => ({affix:suffix,base:word.slice(0, -suffix.length)}));
-  return {word,lemmas,components,compounds,prefixes,suffixes};
+  const punctuationComponents=word.split(/[\p{P}\p{S}]+/u).filter(Boolean);
+  if(punctuationComponents.length>1)for(const component of punctuationComponents)components.add(component);
+  return {word,lemmas,components,compounds,prefixes,suffixes,punctuationComponents};
 }
 
 function intersection(a, b) { return [...a].filter(value => b.has(value)); }
@@ -80,7 +82,12 @@ function intersection(a, b) { return [...a].filter(value => b.has(value)); }
 export function morphologyBetween(aInput, bInput, vocabulary, segmentEvidence = () => 1) {
   const a=aInput.toLowerCase(),b=bInput.toLowerCase();
   if(!a||!b)return {score:0,kind:null,shared:[],measurements:null};
+  const letters=value=>[...value].filter(char=>/[\p{L}\p{N}]/u.test(char)).join("");
+  const split=value=>value.split(/[\p{P}\p{S}]+/u).filter(Boolean);
+  const compactA=letters(a),compactB=letters(b),sharedComponents=intersection(new Set(split(a)),new Set(split(b))).sort((x,y)=>y.length-x.length);
   const candidates=[
+    ...(compactA&&compactA===compactB&&a!==b?[{kind:"punctuation_folded_form",fragment:compactA,position:"punctuation_folded"}]:[]),
+    ...sharedComponents.map(fragment=>({kind:"punctuation_component",fragment,position:"punctuation_component"})),
     {kind:"shared_initial_segment",fragment:commonPrefix(a,b),position:"initial"},
     {kind:"shared_terminal_segment",fragment:commonSuffix(a,b),position:"terminal"},
     {kind:"shared_internal_segment",fragment:longestSubstring(a,b),position:"internal"},
@@ -88,13 +95,15 @@ export function morphologyBetween(aInput, bInput, vocabulary, segmentEvidence = 
   let best={score:0,kind:null,shared:[],measurements:null};
   for(const candidate of candidates){
     const n=candidate.fragment.length;if(!n)continue;
-    const lengthValue=wordLengthValue(candidate.fragment,Math.max(a.length,b.length));
-    const sourceCoverage=n/a.length,targetCoverage=n/b.length,coverage=Math.sqrt(sourceCoverage*targetCoverage);
+    const letterLength=letters(candidate.fragment).length;if(!letterLength)continue;
+    const sourceLetters=Math.max(1,compactA.length),targetLetters=Math.max(1,compactB.length);
+    const lengthValue=wordLengthValue(candidate.fragment,Math.max(sourceLetters,targetLetters));
+    const sourceCoverage=letterLength/sourceLetters,targetCoverage=letterLength/targetLetters,coverage=Math.sqrt(sourceCoverage*targetCoverage);
     const observed=segmentEvidence(candidate.fragment,candidate.position),editDistance=levenshtein(a,b),transformationExactness=n/(n+editDistance);
     const rarity=typeof observed==="number"?observed:observed.rarity;
     const positionalExactness=candidate.position==="internal"?.5*(Number(a.includes(candidate.fragment))+Number(b.includes(candidate.fragment))):1;
     const score=round6(clamp(lengthValue*coverage*rarity*positionalExactness*transformationExactness));
-    if(score>best.score)best={...candidate,score,shared:[candidate.fragment],measurements:{letters:n,lengthValue:round6(lengthValue),sourceCoverage:round6(sourceCoverage),targetCoverage:round6(targetCoverage),coverage:round6(coverage),rarity:round6(rarity),positionalExactness:round6(positionalExactness),editDistance,transformationExactness:round6(transformationExactness),corpusFrequency:observed?.frequency??null,independentTokenFrequency:observed?.independentTokenFrequency??null}};
+    if(score>best.score)best={...candidate,score,shared:[candidate.fragment],measurements:{letters:letterLength,lengthValue:round6(lengthValue),sourceCoverage:round6(sourceCoverage),targetCoverage:round6(targetCoverage),coverage:round6(coverage),rarity:round6(rarity),positionalExactness:round6(positionalExactness),editDistance,transformationExactness:round6(transformationExactness),corpusFrequency:observed?.frequency??null,independentTokenFrequency:observed?.independentTokenFrequency??null}};
   }
   return best;
 }
@@ -168,7 +177,7 @@ function weightedByCounts(values, counts) {
 
 export function textualSelfRecursiveScore(components) {
   const recursive=values=>{const observed=values.filter(value=>value>0),sum=observed.reduce((a,b)=>a+b,0);return sum?clamp(observed.reduce((a,b)=>a+b*b,0)/sum):0;};
-  const word=recursive([components.jaccard,components.rare,components.morphology,components.phrase]);
+  const word=recursive([components.jaccard,components.rare,components.morphology,components.phrase,components.phraseVariant]);
   const letter=recursive([components.letterPattern,components.capitalization]);
   const line=clamp(components.phrase||0);
   return {score:weightedByCounts({word,letter,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),line:round6(line)}};

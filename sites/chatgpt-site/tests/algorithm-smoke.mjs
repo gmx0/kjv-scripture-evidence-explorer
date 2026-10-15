@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import {ALGORITHM_VERSION,bestLetterPattern,caseEvidence,corpusRarity,exactWordEvidence,lemmaCandidates,morphologyBetween,proximitySelfRecursiveScore,repetitionValue,textualSelfRecursiveScore,totalScore,wordFeatures,wordLengthValue} from "../dist/algorithm.js";
 
-assert.equal(ALGORITHM_VERSION,"2.5.0");
+assert.equal(ALGORITHM_VERSION,"2.6.0");
 const vocabulary=new Set(["free","will","self","freewill","selfwill","selfwilled"]);
 assert.deepEqual(wordFeatures("freewill",vocabulary).components,new Set(["free","will"]));
 assert(lemmaCandidates("selfwilled").includes("selfwill"));
 assert.equal(morphologyBetween("freewill","selfwill",vocabulary,()=>({rarity:1,frequency:1,independentTokenFrequency:1})).kind,"shared_terminal_segment");
 assert.doesNotThrow(()=>morphologyBetween("selfwilled","selfwill",vocabulary,()=>1));
+assert.equal(morphologyBetween("free-will","freewill",vocabulary,()=>1).kind,"punctuation_folded_form");
+assert.equal(morphologyBetween("man's","man",vocabulary,()=>1).kind,"punctuation_component");
 const willSegment=morphologyBetween("freewill","selfwill",vocabulary,()=>({rarity:.8,frequency:2,independentTokenFrequency:10}));
 const edSegment=morphologyBetween("commanded","revealed",vocabulary,()=>({rarity:.2,frequency:100,independentTokenFrequency:0}));
 assert.equal(edSegment.kind,"shared_terminal_segment");
@@ -35,6 +37,8 @@ const everlasting=textualSelfRecursiveScore({jaccard:.20,rare:.20,morphology:0,p
 const separated=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,phrase:0,letterPattern:0,capitalization:0}).score;
 const continuous=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,phrase:.50,letterPattern:0,capitalization:0}).score;
 assert(life<everlasting&&everlasting<separated&&separated<continuous);
+const punctuationVariant=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,phrase:0,phraseVariant:.40,letterPattern:0,capitalization:0});
+assert(punctuationVariant.score>separated&&punctuationVariant.groups.line===0);
 assert.equal(proximitySelfRecursiveScore({word:1,book:1,letter:1,verse:1,chapter:1,testament:1}),1);
 assert(proximitySelfRecursiveScore({word:1})>.78);
 console.log("algorithm smoke tests passed");
