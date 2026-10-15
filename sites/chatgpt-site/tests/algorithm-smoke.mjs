@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import {ALGORITHM_VERSION,bestLetterPattern,caseEvidence,corpusRarity,exactWordEvidence,finalEvidenceScore,lemmaCandidates,morphologyBetween,proximitySelfRecursiveScore,repetitionValue,textualSelfRecursiveScore,totalScore,wordFeatures,wordLengthValue} from "../dist/algorithm.js";
+import {ALGORITHM_VERSION,bestLetterPattern,caseEvidence,corpusRarity,exactWordEvidence,finalEvidenceScore,lemmaCandidates,morphologyBetween,orderEvidence,proximitySelfRecursiveScore,repetitionValue,textualSelfRecursiveScore,totalScore,wordFeatures,wordLengthValue} from "../dist/algorithm.js";
 
-assert.equal(ALGORITHM_VERSION,"2.7.0");
+assert.equal(ALGORITHM_VERSION,"2.8.0");
 const vocabulary=new Set(["free","will","self","freewill","selfwill","selfwilled"]);
 assert.deepEqual(wordFeatures("freewill",vocabulary).components,new Set(["free","will"]));
 assert(lemmaCandidates("selfwilled").includes("selfwill"));
@@ -39,9 +39,14 @@ const continuous=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,ph
 assert(life<everlasting&&everlasting<separated&&separated<continuous);
 const punctuationVariant=textualSelfRecursiveScore({jaccard:.30,rare:.25,morphology:0,phrase:0,phraseVariant:.40,letterPattern:0,capitalization:0});
 assert(punctuationVariant.score>separated&&punctuationVariant.groups.line===0);
+const ordered=orderEvidence(["everlasting","life"],["everlasting","life"],()=>1,89);
+const separatedOrder=orderEvidence(["everlasting","life"],["everlasting","and","life"],()=>1,89);
+const reversedOrder=orderEvidence(["everlasting","life"],["life","everlasting"],()=>1,89);
+assert.equal(ordered.score,1);
+assert(ordered.score>separatedOrder.score&&separatedOrder.score>reversedOrder.score&&reversedOrder.score>0);
 assert.equal(proximitySelfRecursiveScore({word:1,book:1,letter:1,verse:1,chapter:1,testament:1}),1);
 assert(proximitySelfRecursiveScore({word:1})>.78);
 assert.equal(finalEvidenceScore(1,1),1);
 assert(finalEvidenceScore(.5,1)>finalEvidenceScore(.5,0));
-assert.equal(Math.round((finalEvidenceScore(.5,1)-finalEvidenceScore(.5,0))*1e6),73590);
+assert.equal(Math.round((finalEvidenceScore(.5,1)-finalEvidenceScore(.5,0))*1e6),70628);
 console.log("algorithm smoke tests passed");

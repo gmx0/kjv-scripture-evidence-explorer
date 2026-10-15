@@ -1,8 +1,8 @@
-export const ALGORITHM_VERSION = "2.7.0";
+export const ALGORITHM_VERSION = "2.8.0";
 
-export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,line:33});
+export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,order:61,line:33});
 export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
-export const FINAL_CONCEPT_COUNTS = Object.freeze({textual:1347,neighbour:107});
+export const FINAL_CONCEPT_COUNTS = Object.freeze({textual:1408,neighbour:107});
 
 export const clamp = value => Math.min(1, Math.max(0, value));
 export const round6 = value => Math.round((value + Number.EPSILON) * 1e6) / 1e6;
@@ -171,6 +171,36 @@ export function nearPhraseEvidence(a,b,maxGap=89){
   return selected;
 }
 
+export function optimalTokenAlignment(a,b,weight=()=>1){
+  const rows=Array.from({length:a.length+1},()=>new Array(b.length+1).fill(0));
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++){
+    const diagonal=a[i-1]===b[j-1]?rows[i-1][j-1]+Math.max(0,weight(a[i-1])):-1;
+    rows[i][j]=Math.max(diagonal,rows[i-1][j],rows[i][j-1]);
+  }
+  const alignment=[];let i=a.length,j=b.length;
+  while(i&&j){
+    const w=a[i-1]===b[j-1]?Math.max(0,weight(a[i-1])):-1;
+    if(w>=0&&Math.abs(rows[i][j]-(rows[i-1][j-1]+w))<1e-12){alignment.push({token:a[i-1],sourcePosition:i-1,targetPosition:j-1,weight:round6(w)});i--;j--;}
+    else if(rows[i-1][j]>=rows[i][j-1])i--;else j--;
+  }
+  return alignment.reverse();
+}
+
+export function orderEvidence(a,b,weight=()=>1,maxGap=89){
+  const alignment=optimalTokenAlignment(a,b,weight);
+  if(!alignment.length)return{score:0,alignment:[],measurements:{orderedCoverage:0,relativePosition:0,pairDirection:0,gapAgreement:0,continuity:0}};
+  const recursive=values=>{const observed=values.filter(value=>value>0),sum=observed.reduce((x,y)=>x+y,0);return sum?observed.reduce((x,y)=>x+y*y,0)/sum:0;};
+  const sourceWeight=a.reduce((sum,token)=>sum+Math.max(0,weight(token)),0),targetWeight=b.reduce((sum,token)=>sum+Math.max(0,weight(token)),0),matchedWeight=alignment.reduce((sum,item)=>sum+item.weight,0);
+  const orderedCoverage=clamp(2*matchedWeight/(sourceWeight+targetWeight||1));
+  const positionWeight=alignment.reduce((sum,item)=>sum+item.weight,0),relativePosition=positionWeight?alignment.reduce((sum,item)=>{const sp=item.sourcePosition/Math.max(1,a.length-1),tp=item.targetPosition/Math.max(1,b.length-1);return sum+item.weight*(1-Math.abs(sp-tp));},0)/positionWeight:0;
+  const shared=[...new Set(a.filter(token=>b.includes(token)))],pairs=[];for(let x=0;x<shared.length;x++)for(let y=x+1;y<shared.length;y++){const left=shared[x],right=shared[y],sourceDirection=Math.sign(a.indexOf(right)-a.indexOf(left)),targetDirection=Math.sign(b.indexOf(right)-b.indexOf(left));pairs.push(sourceDirection===targetDirection);}
+  const disagreements=pairs.filter(value=>!value).length,pairDirection=pairs.length?(1+Math.log((pairs.length+1)/(disagreements+1)))/(1+Math.log(pairs.length+1)):orderedCoverage;
+  let gapAgreement=orderedCoverage,continuity=orderedCoverage;
+  if(alignment.length>1){let gapDifference=0,totalGaps=0,adjacent=0;for(let k=1;k<alignment.length;k++){const sourceGap=Math.max(0,alignment[k].sourcePosition-alignment[k-1].sourcePosition-1),targetGap=Math.max(0,alignment[k].targetPosition-alignment[k-1].targetPosition-1);gapDifference+=Math.abs(sourceGap-targetGap);totalGaps+=sourceGap+targetGap;if(sourceGap===0&&targetGap===0)adjacent++;}gapAgreement=(1+Math.log((maxGap+1)/(Math.min(gapDifference,maxGap)+1)))/(1+Math.log(maxGap+1));continuity=(1+adjacent)/(alignment.length);}
+  const measurements={orderedCoverage:round6(orderedCoverage),relativePosition:round6(relativePosition),pairDirection:round6(clamp(pairDirection)),gapAgreement:round6(clamp(gapAgreement)),continuity:round6(clamp(continuity))};
+  return{score:round6(clamp(recursive(Object.values(measurements)))),alignment,measurements};
+}
+
 function weightedByCounts(values, counts) {
   const entries=Object.entries(counts), denominator=entries.reduce((sum,[,count])=>sum+count,0);
   return round6(clamp(entries.reduce((sum,[key,count])=>sum+count*clamp(values[key]||0),0)/denominator));
@@ -180,8 +210,9 @@ export function textualSelfRecursiveScore(components) {
   const recursive=values=>{const observed=values.filter(value=>value>0),sum=observed.reduce((a,b)=>a+b,0);return sum?clamp(observed.reduce((a,b)=>a+b*b,0)/sum):0;};
   const word=recursive([components.jaccard,components.rare,components.morphology,components.phrase,components.phraseVariant]);
   const letter=recursive([components.letterPattern,components.capitalization]);
+  const order=clamp(components.order||0);
   const line=clamp(components.phrase||0);
-  return {score:weightedByCounts({word,letter,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),line:round6(line)}};
+  return {score:weightedByCounts({word,letter,order,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),order:round6(order),line:round6(line)}};
 }
 
 export function proximitySelfRecursiveScore(axes) {

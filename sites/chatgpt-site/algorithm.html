@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Versioned search and ranking algorithm for the KJV Scripture Evidence Explorer.">
-  <title>Algorithm 2.7 · KJV Scripture Evidence Explorer</title>
+  <title>Algorithm 2.8 · KJV Scripture Evidence Explorer</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body><main>
-  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.7</a></nav>
-  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.7</h1><p class="lede">The 107 corpus occurrences of <em>neighbour</em> now give canonical proximity direct influence on the displayed score. Textual evidence remains dominant, while nearness is no longer merely a tie-breaker.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.7.0</strong></div></header>
+  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.8</a></nav>
+  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.8</h1><p class="lede">The 61 corpus occurrences of <em>order</em> now give arrangement its own textual group. Weighted optimal alignment grades exact order, separation, relative position, gaps, and reversal continuously.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.8.0</strong></div></header>
   <article class="prose-page">
     <aside class="principle"><strong>Versioning rule</strong><p>Any change to formulas, component meanings, default weights, normalization, pruning, or tie-breaking requires a new algorithm version and a corresponding revision of this page.</p></aside>
 
@@ -24,17 +24,21 @@
     </ol>
 
     <h2>Self-recursive textual score</h2>
-    <div class="formula">Text = (1243 × Word + 71 × Letter + 33 × Exact-Line) ÷ 1347</div>
+    <div class="formula">Text = (1243 × Word + 71 × Letter + 61 × Order + 33 × Exact-Line) ÷ 1408</div>
     <table class="algorithm-table"><thead><tr><th>Group</th><th>KJV count</th><th>Outer weight</th><th>Internal evidence</th></tr></thead><tbody>
-      <tr><td>Word</td><td>word(s) = 1,243</td><td>92.2791%</td><td>Exact words and exact continuous phrases as virtual words, occurrence rarity, length rarity, repetition, and shared segments</td></tr>
-      <tr><td>Letter</td><td>letter(s) = 71</td><td>5.2710%</td><td>Contiguous, ordered, unordered, and literal case-position agreement</td></tr>
-      <tr><td>Exact-Line</td><td>line(s) = 33</td><td>2.4499%</td><td>Additional evidence only for an exact continuous multiword phrase</td></tr>
+      <tr><td>Word</td><td>word(s) = 1,243</td><td>88.2813%</td><td>Exact words and exact continuous phrases as virtual words, occurrence rarity, length rarity, repetition, and shared segments</td></tr>
+      <tr><td>Letter</td><td>letter(s) = 71</td><td>5.0426%</td><td>Contiguous, ordered, unordered, and literal case-position agreement</td></tr>
+      <tr><td>Order</td><td>order = 61</td><td>4.3324%</td><td>Weighted ordered coverage, relative position, pair direction, gap agreement, and continuity</td></tr>
+      <tr><td>Exact-Line</td><td>line(s) = 33</td><td>2.3438%</td><td>Additional evidence only for an exact continuous multiword phrase</td></tr>
     </tbody></table>
     <p>Within each group, observed components recursively weight themselves by <code>Σ(value²) ÷ Σ(value)</code>. An exact phrase receives its full Word contribution plus the additive Exact-Line component. Line/Verse also remains independently represented in canonical proximity. Exact repeated displayed text remains 1.000.</p>
 
     <h2>Final neighbour-weighted score</h2>
-    <div class="formula">Final = (1,347 × Textual + 107 × Proximity) ÷ 1,454</div>
-    <p>The textual block count is <code>word(s) 1,243 + letter(s) 71 + line(s) 33 = 1,347</code>. The exact corpus count of <code>neighbour</code> is 107, placing the proximity concept below <code>book(s) = 196</code> and above <code>letter(s) = 71</code>. Therefore textual evidence supplies 92.6410% of the final score and proximity supplies 7.3590%. Across otherwise equal candidates, the full possible proximity range can change the displayed score by at most 0.073590.</p>
+    <div class="formula">Final = (1,408 × Textual + 107 × Proximity) ÷ 1,515</div>
+    <p>The textual block count is <code>word(s) 1,243 + letter(s) 71 + order 61 + line(s) 33 = 1,408</code>. The exact corpus count of <code>neighbour</code> is 107. Therefore textual evidence supplies 92.9373% of the final score and proximity supplies 7.0627%. Across otherwise equal candidates, the full possible proximity range can change the displayed score by at most 0.070628.</p>
+
+    <h2>Order</h2>
+    <p>The scorer constructs a deterministic optimal monotonic alignment, maximizing the corpus-derived rarity-and-length evidence of matched words rather than accepting the first repeated occurrence. Five measurements then recursively combine: weighted ordered coverage, relative-position agreement, pair-direction agreement, gap agreement, and adjacency continuity. Exact continuous order reaches the maximum. Same-order separated words decay according to their gaps. Reversed words retain weaker positive evidence through their shared wording and measurable pair-direction disagreement; they are not absolutely discarded.</p>
 
     <h2>Self-recursive canonical proximity</h2>
     <div class="formula">Proximity = (1243Pw + 196Pb + 71Pl + 33Pv + 29Pc + 14Pt) ÷ 1586</div>
@@ -46,7 +50,7 @@
       <tr><td>Chapter / chapiter</td><td>29</td><td>1.8285%</td><td>Linear canonical distance across 1,189 chapters</td></tr>
       <tr><td>Testament</td><td>14</td><td>0.8827%</td><td>1 when both verses are in the same testament, otherwise 0</td></tr>
     </tbody></table>
-    <p>Each axis remains present: same chapter, same book, and same testament accumulate structural evidence instead of being replaced by a single global word coordinate. Proximity is displayed separately and breaks textual-score ties; it does not manufacture a textual match.</p>
+    <p>Each axis remains present: same chapter, same book, and same testament accumulate structural evidence instead of being replaced by a single global word coordinate. Proximity contributes through the separately counted <code>neighbour</code> concept; it does not manufacture a textual match.</p>
 
     <h2>Vocabulary and rarity</h2>
     <div class="formula">rarity(t) = [1 + ln((63,919 + 1) / (cf(t) + 1))] ÷ [1 + ln((63,919 + 1) / (1 + 1))]</div>
@@ -79,10 +83,10 @@
     <p>Complete verse identities are admitted first. Remaining candidates are ordered before the 5,000-item quota by a corpus-bounded upper estimate from weighted exact-word coverage and rarity. The interface reports discovered, evaluated, and pruned counts.</p>
 
     <h2>Stable ordering</h2>
-    <p>Results resolve by complete-verse identity, self-recursive textual score, self-recursive canonical proximity, and finally canonical Bible order. This prevents geography from outweighing stronger wording while retaining every structural scale.</p>
+    <p>Results resolve by complete-verse identity, neighbour-weighted final score, textual score, canonical proximity, and finally canonical Bible order. This prevents geography from outweighing stronger wording while retaining every structural scale.</p>
 
     <h2>Interpretive boundary</h2>
     <p>The algorithm measures visible relationships in a versioned corpus. Similarity is evidence for study, not proof that two passages have the same meaning. Dictionary bridges and editorial cross-references remain separate from Scripture-derived evidence.</p>
   </article>
-  <footer><p><a href="./">Use algorithm 2.7 in the explorer</a></p></footer>
+  <footer><p><a href="./">Use algorithm 2.8 in the explorer</a></p></footer>
 </main></body></html>

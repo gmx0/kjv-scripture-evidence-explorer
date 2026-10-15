@@ -1,9 +1,10 @@
 {
-  "algorithmVersion": "2.7.0",
+  "algorithmVersion": "2.8.0",
   "corpusBounds": "dist/data/kjv/corpus-bounds.json",
-  "selfRecursiveTextualCounts": {"word": 1243, "letter": 71, "line": 33},
-  "finalScoreCounts": {"textual": 1347, "neighbourProximity": 107},
-  "finalScoreFormula": "(1347 * textual_score + 107 * proximity_score) / 1454; exact repeated displayed text remains 1.000 and nonidentity results remain capped below it.",
+  "selfRecursiveTextualCounts": {"word": 1243, "letter": 71, "order": 61, "line": 33},
+  "orderEvidence": "Deterministic rarity-and-length-weighted optimal monotonic token alignment; recursive mean of ordered coverage, relative-position agreement, pair-direction agreement, gap agreement, and continuity. Reversal and separation decay continuously but remain positive when shared wording exists.",
+  "finalScoreCounts": {"textual": 1408, "neighbourProximity": 107},
+  "finalScoreFormula": "(1408 * textual_score + 107 * proximity_score) / 1515; exact repeated displayed text remains 1.000 and nonidentity results remain capped below it.",
   "textualGroupCombination": "For each group, observed component values recursively weight themselves: sum(value^2) / sum(value). No fixed internal percentages.",
   "selfRecursiveProximityCounts": {"word": 1243, "book": 196, "letter": 71, "verse_line": 33, "chapter_chapiter": 29, "testament": 14},
   "phraseGapDecay": "(1 + ln((corpus_max_gap + 1)/(gap + 1))) / (1 + ln(corpus_max_gap + 1))",
@@ -18,5 +19,5 @@
   "completeSequenceIdentity": "Recursive mean of token identity, surface-token agreement, exact-case characters, punctuation/spacing, and displayed characters; no fixed 0.995/0.985 tiers.",
   "segmentEvidence": "shared letters × coverage of both forms × corpus positional rarity × observed positional exactness",
   "capitalization": "literal case-position agreement only; no grammatical or sentence-initial discount",
-  "notes": "Algorithm 2.7 uses measurable KJV corpus facts without grammatical, semantic, theological, or editorial judgments. The 107 exact occurrences of neighbour give canonical proximity direct final-score influence. Exact phrases require exact punctuation and spacing; punctuation variants decay measurably instead of disappearing. Every detected relationship remains positive; pruning means unevaluated, never unrelated."
+  "notes": "Algorithm 2.8 uses measurable KJV corpus facts without grammatical, semantic, theological, or editorial judgments. The 61 exact occurrences of order give word-order evidence its own textual group. The 107 exact occurrences of neighbour give canonical proximity direct final-score influence. Exact phrases require exact punctuation and spacing; punctuation variants, separation, and reversal decay measurably instead of disappearing."
 }

@@ -1,6 +1,6 @@
 {
   "corpusVersion": "KJV-PCE-BP-2010-v1",
-  "algorithmVersion": "2.7.0",
+  "algorithmVersion": "2.8.0",
   "bounds": {
     "version": "KJV-PCE-BP-2010-v1-bounds-1",
     "totalTokens": 789662,
