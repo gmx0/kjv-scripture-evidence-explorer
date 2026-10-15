@@ -1,8 +1,8 @@
-export const ALGORITHM_VERSION = "2.8.0";
+export const ALGORITHM_VERSION = "2.9.0";
 
-export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,letter:71,order:61,line:33});
+export const TEXTUAL_CONCEPT_COUNTS = Object.freeze({word:1243,rarity:253,letter:71,order:61,line:33});
 export const PROXIMITY_CONCEPT_COUNTS = Object.freeze({word:1243,book:196,letter:71,verse:33,chapter:29,testament:14});
-export const FINAL_CONCEPT_COUNTS = Object.freeze({textual:1408,neighbour:107});
+export const FINAL_CONCEPT_COUNTS = Object.freeze({textual:1661,neighbour:129});
 
 export const clamp = value => Math.min(1, Math.max(0, value));
 export const round6 = value => Math.round((value + Number.EPSILON) * 1e6) / 1e6;
@@ -103,7 +103,7 @@ export function morphologyBetween(aInput, bInput, vocabulary, segmentEvidence = 
     const observed=segmentEvidence(candidate.fragment,candidate.position),editDistance=levenshtein(a,b),transformationExactness=n/(n+editDistance);
     const rarity=typeof observed==="number"?observed:observed.rarity;
     const positionalExactness=candidate.position==="internal"?.5*(Number(a.includes(candidate.fragment))+Number(b.includes(candidate.fragment))):1;
-    const score=round6(clamp(lengthValue*coverage*rarity*positionalExactness*transformationExactness));
+    const score=round6(clamp(lengthValue*coverage*positionalExactness*transformationExactness));
     if(score>best.score)best={...candidate,score,shared:[candidate.fragment],measurements:{letters:letterLength,lengthValue:round6(lengthValue),sourceCoverage:round6(sourceCoverage),targetCoverage:round6(targetCoverage),coverage:round6(coverage),rarity:round6(rarity),positionalExactness:round6(positionalExactness),editDistance,transformationExactness:round6(transformationExactness),corpusFrequency:observed?.frequency??null,independentTokenFrequency:observed?.independentTokenFrequency??null}};
   }
   return best;
@@ -131,7 +131,7 @@ export function bestLetterPattern(aInput, bInput, frequency = () => 1, vocabular
     const coverage=n/Math.max(a.length,b.length),absoluteLength=Math.log(1+n)/Math.log(1+Math.max(1,maxWordLetters));
     const count=Math.max(1,frequency(pattern.fragment,pattern.kind));
     const rarity=Math.log((vocabularySize+1)/(count+1))/Math.log(vocabularySize+1);
-    const score=coverage*absoluteLength*rarity*pattern.multiplier;
+    const score=coverage*absoluteLength*pattern.multiplier;
     if(score>best.score)best={...pattern,score:round6(score),sharedLength:n,coverage:round6(coverage),rarity:round6(rarity),absoluteLength:round6(absoluteLength)};
   }
   return best;
@@ -208,11 +208,12 @@ function weightedByCounts(values, counts) {
 
 export function textualSelfRecursiveScore(components) {
   const recursive=values=>{const observed=values.filter(value=>value>0),sum=observed.reduce((a,b)=>a+b,0);return sum?clamp(observed.reduce((a,b)=>a+b*b,0)/sum):0;};
-  const word=recursive([components.jaccard,components.rare,components.morphology,components.phrase,components.phraseVariant]);
+  const word=recursive([components.jaccard,components.morphology,components.phrase,components.phraseVariant]);
+  const rarity=clamp(components.rarity??components.rare??0);
   const letter=recursive([components.letterPattern,components.capitalization]);
   const order=clamp(components.order||0);
   const line=clamp(components.phrase||0);
-  return {score:weightedByCounts({word,letter,order,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),letter:round6(letter),order:round6(order),line:round6(line)}};
+  return {score:weightedByCounts({word,rarity,letter,order,line},TEXTUAL_CONCEPT_COUNTS),groups:{word:round6(word),rarity:round6(rarity),letter:round6(letter),order:round6(order),line:round6(line)}};
 }
 
 export function proximitySelfRecursiveScore(axes) {

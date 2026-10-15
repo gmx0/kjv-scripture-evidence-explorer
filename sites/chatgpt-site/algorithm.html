@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Versioned search and ranking algorithm for the KJV Scripture Evidence Explorer.">
-  <title>Algorithm 2.8 · KJV Scripture Evidence Explorer</title>
+  <title>Algorithm 2.9 · KJV Scripture Evidence Explorer</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body><main>
-  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.8</a></nav>
-  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.8</h1><p class="lede">The 61 corpus occurrences of <em>order</em> now give arrangement its own textual group. Weighted optimal alignment grades exact order, separation, relative position, gaps, and reversal continuously.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.8.0</strong></div></header>
+  <nav class="site-nav" aria-label="Site navigation"><a href="./">Explorer</a><a href="./reasoning.html">WHGW reasoning method</a><a aria-current="page" href="./algorithm.html">Algorithm 2.9</a></nav>
+  <header class="masthead info-masthead"><div><p class="eyebrow">Current live specification</p><h1>Search algorithm 2.9</h1><p class="lede">The 253 corpus occurrences of <em>only</em> now bind rarity to one explicit group. Every measured rarity fact contributes there once, preventing rarity from amplifying several structural groups at the same time.</p></div><div class="version-badge"><span>Corpus</span><strong>KJV-PCE-BP-2010-v1</strong><span>Algorithm</span><strong>2.9.0</strong></div></header>
   <article class="prose-page">
     <aside class="principle"><strong>Versioning rule</strong><p>Any change to formulas, component meanings, default weights, normalization, pruning, or tie-breaking requires a new algorithm version and a corresponding revision of this page.</p></aside>
 
@@ -24,18 +24,19 @@
     </ol>
 
     <h2>Self-recursive textual score</h2>
-    <div class="formula">Text = (1243 × Word + 71 × Letter + 61 × Order + 33 × Exact-Line) ÷ 1408</div>
+    <div class="formula">Text = (1243 × Word + 253 × Rarity + 71 × Letter + 61 × Order + 33 × Exact-Line) ÷ 1661</div>
     <table class="algorithm-table"><thead><tr><th>Group</th><th>KJV count</th><th>Outer weight</th><th>Internal evidence</th></tr></thead><tbody>
-      <tr><td>Word</td><td>word(s) = 1,243</td><td>88.2813%</td><td>Exact words and exact continuous phrases as virtual words, occurrence rarity, length rarity, repetition, and shared segments</td></tr>
-      <tr><td>Letter</td><td>letter(s) = 71</td><td>5.0426%</td><td>Contiguous, ordered, unordered, and literal case-position agreement</td></tr>
-      <tr><td>Order</td><td>order = 61</td><td>4.3324%</td><td>Weighted ordered coverage, relative position, pair direction, gap agreement, and continuity</td></tr>
-      <tr><td>Exact-Line</td><td>line(s) = 33</td><td>2.3438%</td><td>Additional evidence only for an exact continuous multiword phrase</td></tr>
+      <tr><td>Word</td><td>word(s) = 1,243</td><td>74.8344%</td><td>Structural exact-word, virtual-word phrase, and shared-form evidence</td></tr>
+      <tr><td>Rarity</td><td>only = 253</td><td>15.2318%</td><td>Recursive combination of word, length, phrase, segment, letter-pattern, and repetition rarity</td></tr>
+      <tr><td>Letter</td><td>letter(s) = 71</td><td>4.2745%</td><td>Contiguous, ordered, unordered, and literal case-position agreement</td></tr>
+      <tr><td>Order</td><td>order = 61</td><td>3.6725%</td><td>Weighted ordered coverage, relative position, pair direction, gap agreement, and continuity</td></tr>
+      <tr><td>Exact-Line</td><td>line(s) = 33</td><td>1.9868%</td><td>Additional evidence only for an exact continuous multiword phrase</td></tr>
     </tbody></table>
     <p>Within each group, observed components recursively weight themselves by <code>Σ(value²) ÷ Σ(value)</code>. An exact phrase receives its full Word contribution plus the additive Exact-Line component. Line/Verse also remains independently represented in canonical proximity. Exact repeated displayed text remains 1.000.</p>
 
     <h2>Final neighbour-weighted score</h2>
-    <div class="formula">Final = (1,408 × Textual + 107 × Proximity) ÷ 1,515</div>
-    <p>The textual block count is <code>word(s) 1,243 + letter(s) 71 + order 61 + line(s) 33 = 1,408</code>. The exact corpus count of <code>neighbour</code> is 107. Therefore textual evidence supplies 92.9373% of the final score and proximity supplies 7.0627%. Across otherwise equal candidates, the full possible proximity range can change the displayed score by at most 0.070628.</p>
+    <div class="formula">Final = (1,661 × Textual + 129 × Proximity) ÷ 1,790</div>
+    <p>The textual block count is <code>word(s) 1,243 + only 253 + letter(s) 71 + order 61 + line(s) 33 = 1,661</code>. The proximity concept count combines the exact tokens <code>neighbour = 107</code> and <code>neighbours = 22</code>, totaling 129; the 28 possessive <code>neighbour’s</code> forms remain a distinct token. Therefore textual evidence supplies 92.7933% of the final score and proximity supplies 7.2067%. Across otherwise equal candidates, the full possible proximity range can change the displayed score by at most 0.072067.</p>
 
     <h2>Order</h2>
     <p>The scorer constructs a deterministic optimal monotonic alignment, maximizing the corpus-derived rarity-and-length evidence of matched words rather than accepting the first repeated occurrence. Five measurements then recursively combine: weighted ordered coverage, relative-position agreement, pair-direction agreement, gap agreement, and adjacency continuity. Exact continuous order reaches the maximum. Same-order separated words decay according to their gaps. Reversed words retain weaker positive evidence through their shared wording and measurable pair-direction disagreement; they are not absolutely discarded.</p>
@@ -54,27 +55,27 @@
 
     <h2>Vocabulary and rarity</h2>
     <div class="formula">rarity(t) = [1 + ln((63,919 + 1) / (cf(t) + 1))] ÷ [1 + ln((63,919 + 1) / (1 + 1))]</div>
-    <p><code>cf(t)</code> is the total KJV occurrence count. The observed frequency range, 1–63,919, supplies both bounds; even the most frequent word retains small nonzero evidence.</p>
-    <div class="formula">occurrence rarity(t) = smoothed inverse total KJV occurrences<br>length rarity(t) = smoothed inverse count of KJV word forms at least as long as t<br>word evidence(t) = recursive mean(occurrence rarity, length rarity)</div>
-    <p>Thus <code>will</code> contributes more than <code>the</code> when the measured facts warrant it. No stop-word list removes common words. Repetitions continue to add evidence with corpus-bounded diminishing returns.</p>
+    <p><code>cf(t)</code> is the total KJV occurrence count. The observed frequency range, 1–63,919, supplies both bounds; even the most frequent word retains small nonzero evidence. The group weight comes from the 253 exact corpus occurrences of <code>only</code>: rarity can contribute at most 15.2318% of Textual, or 14.1341% of Final.</p>
+    <div class="formula">Rarity = recursive mean(word occurrence, word length prevalence, phrase occurrence, segment prevalence, letter-pattern prevalence, repetition prevalence)</div>
+    <p>Thus <code>will</code> contributes more rarity evidence than <code>the</code> when the measured corpus facts warrant it. No stop-word list removes common words. Crucially, these rarity measurements enter this one bounded group only: they do not also multiply Word, Letter, Order, phrase, or morphology scores.</p>
 
     <h2>Exact phrases as virtual words</h2>
-    <div class="formula">phrase rarity(p) = smoothed inverse exact KJV occurrence count<br>phrase length(p) = ln(1 + concatenated phrase letters) ÷ ln(19), bounded at 1<br>virtual-word evidence(p) = recursive mean(phrase rarity, phrase length)</div>
-    <p>A continuous phrase of two or more exact words is scored as one additional exact virtual word under Word/Words only when its punctuation and spacing also agree, and that exact continuity additionally receives the 2.4499% Line component. A phrase with the same token sequence but different punctuation is measured across token identity, surface forms, case characters, punctuation and spacing, and displayed characters—the same layers used for complete verses. It retains the resulting reduced Word evidence but receives no Exact-Line component.</p>
+    <div class="formula">phrase structure(p) = ln(1 + concatenated phrase letters) ÷ ln(19), bounded at 1<br>phrase rarity(p) = smoothed inverse exact displayed-phrase occurrence count</div>
+    <p>A continuous phrase of two or more exact words is scored as one additional exact virtual word under Word/Words only when its punctuation and spacing also agree, and that exact continuity additionally receives the 1.9868% Exact-Line component. Its structural length contributes to Word while its occurrence rarity contributes to Rarity. A phrase with the same token sequence but different punctuation is measured across token identity, surface forms, case characters, punctuation and spacing, and displayed characters—the same layers used for complete verses. It retains reduced Word evidence but receives no Exact-Line component.</p>
     <p>Accordingly, one match for <code>life</code> is weaker than one for the longer and rarer <code>everlasting</code>; matching both separated words is stronger than either alone; and matching the exact continuous phrase <code>everlasting life</code> adds the virtual-word evidence and is stronger still.</p>
 
     <h2>Complete repeated verses</h2>
     <p>Complete token sequences are measured across token identity, surface tokens, exact-case characters, punctuation and spacing, and displayed characters. These layers recursively combine without fixed identity tiers. Exact repeated displayed text naturally reaches <code>1.000</code> because every measured layer is 1. The 119 exact repeated-text groups are regression-tested.</p>
 
     <h2>Shared segments and transformations</h2>
-    <div class="formula">segment = length × geometric coverage of both forms × positional corpus rarity × positional exactness</div>
-    <p>The scorer records shared initial, terminal, and internal segments; it does not pronounce them roots, lemmas, affixes, compounds, or synonyms. Segment rarity is counted across all KJV vocabulary forms at the observed position. Independent-token occurrence is reported as another fact, not a requirement.</p>
+    <div class="formula">segment structure = length × geometric coverage of both forms × positional exactness<br>segment rarity = inverse prevalence at the observed position</div>
+    <p>The scorer records shared initial, terminal, and internal segments; it does not pronounce them roots, lemmas, affixes, compounds, or synonyms. Structural segment strength remains in Word; segment rarity is counted across all KJV vocabulary forms and enters the Rarity group once. Independent-token occurrence is reported as another fact, not a requirement.</p>
     <p>Internal apostrophes and hyphens or dashes are treated symmetrically. The exact displayed form—such as <code>man's</code> or <code>free-will</code>—is retained as one form, while punctuation-delimited components are exposed at the same time. Thus <code>man's</code> may be compared through <code>man</code>, and <code>free-will</code> through <code>free</code> and <code>will</code>, without declaring either punctuation mark an absolute word boundary.</p>
     <p>Accordingly, <code>commanded ↔ revealed</code> reports <code>shared_terminal_segment [ed]</code>. It remains positive, but its two-letter length, small coverage, and high corpus frequency make it weak. <code>freewill ↔ selfwill</code> receives substantially more for <code>will</code>.</p>
 
     <h2>Raw letter evidence</h2>
-    <div class="formula">Lpair = coverage³ × [ln(1 + shared letters) ÷ ln(19)] × measured fragment rarity</div>
-    <p>Letter length is bounded by the observed 18-letter maximum. Corpus fragment and character frequencies reduce common overlaps continuously. One-letter overlap remains nonzero. Capitalization measures exact uppercase/lowercase positions and never discounts sentence-initial or allegedly grammatical capitalization.</p>
+    <div class="formula">Lpair = coverage³ × [ln(1 + shared letters) ÷ ln(19)]<br>letter-pattern rarity = inverse measured fragment prevalence</div>
+    <p>Letter length is bounded by the observed 18-letter maximum. Fragment and character rarity enters the Rarity group instead of multiplying Letter a second time. One-letter overlap remains nonzero. Capitalization measures exact uppercase/lowercase positions and never discounts sentence-initial or allegedly grammatical capitalization.</p>
 
     <h2>Recursive combination without categorical vetoes</h2>
     <p>Each observable component remains visible. Within a group, components weight themselves by their measured values rather than hand-assigned percentages. Zero means the feature was not observed; short, common, distant, or differently capitalized observations receive small positive values rather than categorical rejection.</p>
@@ -88,5 +89,5 @@
     <h2>Interpretive boundary</h2>
     <p>The algorithm measures visible relationships in a versioned corpus. Similarity is evidence for study, not proof that two passages have the same meaning. Dictionary bridges and editorial cross-references remain separate from Scripture-derived evidence.</p>
   </article>
-  <footer><p><a href="./">Use algorithm 2.8 in the explorer</a></p></footer>
+  <footer><p><a href="./">Use algorithm 2.9 in the explorer</a></p></footer>
 </main></body></html>

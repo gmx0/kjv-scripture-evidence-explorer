@@ -17,6 +17,8 @@ assert(bestLetterPattern("freewill","selfwilled",()=>1,words.size).score>bestLet
 const tokenize=text=>[...text.matchAll(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu)].map(match=>match[0].normalize("NFC").toLowerCase().replaceAll("’", "'"));
 const tokenized=rows.map(row=>tokenize(row.displayText)),frequencies=new Map();
 for(const tokens of tokenized)for(const word of tokens)frequencies.set(word,(frequencies.get(word)||0)+1);
+assert.equal(frequencies.get("neighbour"),107);
+assert.equal(frequencies.get("neighbours"),22);
 assert.equal(tokenized.reduce((sum,tokens)=>sum+tokens.length,0),bounds.totalTokens);
 assert.equal(frequencies.size,bounds.vocabulary);
 assert.equal(Math.max(...tokenized.map(tokens=>tokens.length)),bounds.verseWords.max);
